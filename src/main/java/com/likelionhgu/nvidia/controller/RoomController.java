@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
     private final RoomService roomService;
 
-    @PostMapping("/main")
+//    @PostMapping("/main")
 //    public ResponseEntity<Room> (){}
 
-    @PostMapping("/search")
-    public
-
-    @PostMapping("/recommend")
-    public
-
-    @PostMapping("/recommend/detail/{roomId}")
-    public
+//    @PostMapping("/search")
+//    public
+//
+//    @PostMapping("/recommend")
+//    public
+//
+//    @PostMapping("/recommend/detail/{roomId}")
+//    public
 
 }

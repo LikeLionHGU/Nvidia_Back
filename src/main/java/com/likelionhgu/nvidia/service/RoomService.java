@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RoomService {
-    public String addRoom(Room room){}
+//    public String addRoom(Room room){}
 }
