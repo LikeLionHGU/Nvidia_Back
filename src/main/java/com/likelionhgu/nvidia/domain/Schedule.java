@@ -15,7 +15,7 @@ public class Schedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    private int index;
+    private int slotIndex;
     private String rePhoneNumber;
 
     @ManyToOne

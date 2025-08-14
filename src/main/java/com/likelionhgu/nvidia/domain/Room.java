@@ -7,35 +7,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
+@Table(name = "room")
 public class Room {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String enName;
     private String enPhoneNumber;
-    private Long addressId;
+
+    // 숫자 ID 대신 연관관계로 변경
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
+
     private String account;
     private int maxPeople;
     private int price;
+
+    @Column(length = 2000)
     private String memo;
-    private List<String> optionList;
-    private List<String> chipList;
-    private List<String> photoList;
 
-    @OneToMany(
-            mappedBy = "room",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
-    )
-    private List<Reservation> reservations = new ArrayList<>();
+    // 문자열 리스트는 ElementCollection로 별도 테이블에 매핑
+    @ElementCollection
+    @CollectionTable(name = "room_options", joinColumns = @JoinColumn(name = "room_id"))
+    @Column(name = "option_name")
+    private List<String> optionList = new ArrayList<>();
 
-    @OneToMany(
-            mappedBy = "room",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
-    )
-    private List<Schedule> schedules = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "room_chips", joinColumns = @JoinColumn(name = "room_id"))
+    @Column(name = "chip_name")
+    private List<String> chipList = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "room_photos", joinColumns = @JoinColumn(name = "room_id"))
+    @Column(name = "photo_url")
+    private List<String> photoList = new ArrayList<>();
 }
-
