@@ -13,14 +13,14 @@ import java.util.List;
 public class Room {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String phoneNumber;
-    private String address;
+    private String enName;
+    private String enPhoneNumber;
+    private Long addressId;
     private String account;
     private int maxPeople;
     private int price;
     private String memo;
-    private List<String> optionsList;
+    private List<String> optionList;
     private List<String> chipList;
     private List<String> photoList;
 
@@ -30,5 +30,12 @@ public class Room {
             cascade = CascadeType.ALL
     )
     private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "room",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    private List<Schedule> schedules = new ArrayList<>();
 }
 
