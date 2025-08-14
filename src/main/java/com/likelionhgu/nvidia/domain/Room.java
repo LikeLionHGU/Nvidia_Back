@@ -30,19 +30,7 @@ public class Room {
     @Column(length = 2000)
     private String memo;
 
-    // 문자열 리스트는 ElementCollection로 별도 테이블에 매핑
-    @ElementCollection
-    @CollectionTable(name = "room_options", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "option_name")
     private List<String> optionList = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "room_chips", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "chip_name")
     private List<String> chipList = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "room_photos", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "photo_url")
     private List<String> photoList = new ArrayList<>();
 }
