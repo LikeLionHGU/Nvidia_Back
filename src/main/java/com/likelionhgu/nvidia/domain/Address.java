@@ -18,5 +18,6 @@ public class Address {
     private double longitude;
     private String roadName;
 
-    // TODO : OneToOne 역참조 하기
+    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    private Room room;
 }
