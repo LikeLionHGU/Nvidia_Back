@@ -4,8 +4,6 @@ import com.likelionhgu.nvidia.controller.request.AddressAndPromptRequest;
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
 import com.likelionhgu.nvidia.controller.request.PasswordRequest;
 import com.likelionhgu.nvidia.controller.request.ReservationRequest;
-import com.likelionhgu.nvidia.domain.Reservation;
-import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.dto.ReAndEnDto;
 import com.likelionhgu.nvidia.dto.RecommendDto;
 import com.likelionhgu.nvidia.service.Service;
@@ -30,15 +28,13 @@ public class Controller {
         return ResponseEntity.ok().body(recommendsDto);
     }
 
-    //TODO: Post 말고 Get 아닌가?
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<List<RecommendDto>> searchByWords(@RequestBody AddressRequest address){
         List<RecommendDto> recommendsDto = service.getRooms(address);
         return ResponseEntity.ok().body(recommendsDto);
     }
 
-    //TODO: Post 말고 Get 아닌가?
-    @PostMapping("/recommend")
+    @GetMapping("/recommend")
     public ResponseEntity<List<RecommendDto>> recommendAboutPrompt(@RequestBody AddressAndPromptRequest AddressAndPrompt){
         List<RecommendDto> recommendsDto = service.getRoomsWithPrompt(AddressAndPrompt);
         return ResponseEntity.ok().body(recommendsDto);
@@ -68,8 +64,7 @@ public class Controller {
         return ResponseEntity.ok().body(message);
     }
 
-    //TODO: Post 말고 Get 아닌가?
-    @PostMapping("/reservation/confirmation")
+    @GetMapping("/reservation/confirmation")
     public ResponseEntity<ReAndEnDto> checkConfirmation(@RequestBody PasswordRequest passwordRequest){
         ReAndEnDto ReAndEns = service.accessToRecords(passwordRequest);
         return ResponseEntity.ok().body(ReAndEns);

@@ -25,9 +25,6 @@ public class Service {
     ReservationRepository reservationRepository;
     ScheduleRepository scheduleRepository;
 
-    //TODO: Address 사용 방법에 의문이 든다. Address를 Dto가 아닌 Entity로 만든 이유는 Repositoty를 만들어 AI 검색 시 위치 기반 추천해주기 위함인가?
-    //TODO: 단순 위치로 공간 정보 받아올 때는 AddressRepository 접근 없이 하는 게 효율적인가?
-
     public List<RecommendDto> getRooms(AddressRequest request){
         roomRepository.findByAddress(Address.from(request));
         //TODO: 여기에서 AI를 사용해야 할 것 같다

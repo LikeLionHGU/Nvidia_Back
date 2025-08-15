@@ -34,6 +34,10 @@ public class Room {
     private List<String> chipList = new ArrayList<>();
     private List<String> photoList = new ArrayList<>();
 
-    //TODO: Reservation과 OneToMany 연결해야 하지 않나?
-    //TODO: Address를 이용하는 방법은?
+    @OneToMany(
+            mappedBy = "room",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    private List<Reservation> reservations = new ArrayList<>();
 }
