@@ -17,4 +17,6 @@ public class Address {
     private double latitude;
     private double longitude;
     private String roadName;
+
+    // TODO : OneToOne 역참조 하기
 }
