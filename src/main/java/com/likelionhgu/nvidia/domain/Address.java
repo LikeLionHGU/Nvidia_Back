@@ -36,4 +36,7 @@ public class Address {
                 .build();
 
     }
+
+    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    private Room room;
 }
