@@ -33,4 +33,7 @@ public class Room {
     private List<String> optionList = new ArrayList<>();
     private List<String> chipList = new ArrayList<>();
     private List<String> photoList = new ArrayList<>();
+
+    //TODO: Reservation과 OneToMany 연결해야 하지 않나?
+    //TODO: Address를 이용하는 방법은?
 }
