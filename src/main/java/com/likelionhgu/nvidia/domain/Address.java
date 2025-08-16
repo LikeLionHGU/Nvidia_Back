@@ -28,11 +28,12 @@ public class Address {
                 .build();
     }
 
+    //TODO: AddressAndPromptRequest 안의 Address 해결하기
     public static Address from(AddressAndPromptRequest addressAndPromptRequest){
         return Address.builder()
-                .latitude(addressAndPromptRequest.getLatitude())
-                .longitude(addressAndPromptRequest.getLongitude())
-                .roadName(addressAndPromptRequest.getRoadName())
+                .latitude(addressAndPromptRequest.getAddresses().getLatitude())
+                .longitude(addressAndPromptRequest.getAddresses().getLongitude())
+                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
                 .build();
 
     }

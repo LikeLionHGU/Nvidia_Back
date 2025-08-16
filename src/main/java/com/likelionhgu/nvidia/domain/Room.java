@@ -1,5 +1,6 @@
 package com.likelionhgu.nvidia.domain;
 
+import com.likelionhgu.nvidia.controller.request.EnrollmentRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,9 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
-@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Builder
 @Table(name = "room")
 public class Room {
 
@@ -40,4 +43,28 @@ public class Room {
             cascade = CascadeType.ALL
     )
     private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "room",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    private List<Schedule> schedules = new ArrayList<>();
+
+    public static Room make(EnrollmentRequest request, List<String> fileUrl){
+        return Room.builder()
+                .enName(request.getEnName())
+                .enPhoneNumber(request.getEnPhoneNumber())
+                .address(request.getAddress())
+                .account(request.getAccount())
+                .maxPeople(request.getMaxPeople())
+                .price(request.getPrice())
+                .memo(request.getMemo())
+                .optionList(request.getOptionList())
+                .chipList(request.getChipList())
+                .photoList(fileUrl)
+                .reservations()
+                .build();
+
+    }
 }

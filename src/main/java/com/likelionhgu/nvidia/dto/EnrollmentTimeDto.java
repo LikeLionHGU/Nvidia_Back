@@ -3,10 +3,14 @@ package com.likelionhgu.nvidia.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Getter @Setter
 public class EnrollmentTimeDto {
-    private String date;
-    private List<SlotDto> availableSlot;
+    private LocalDate date;
+    private Set<Integer> selectedTimeSlot = new TreeSet<>();
 }
+
+//TODO: List에서 Set으로 바꾸었고 Slot 객체를 없애고 바로 인덱스 넣도록 Integer를 요소로 설정했다

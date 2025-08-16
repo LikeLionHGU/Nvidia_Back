@@ -17,6 +17,7 @@ public class EnrollmentRequest {
     private String memo;
     private List<String> optionList;
     private List<String> chipList;
-    private EnrollmentTimeDto enrollmentTimeDto;
+    //TODO: 프론트에서 등록자가 선택한 시간 넘겨주도록 하기
+    private List<EnrollmentTimeDto> enrollmentTimeDto;
 
 }

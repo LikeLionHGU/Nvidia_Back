@@ -1,9 +1,11 @@
 package com.likelionhgu.nvidia.domain;
 
 import com.likelionhgu.nvidia.controller.request.ReservationRequest;
-import com.likelionhgu.nvidia.dto.ReservationTimeDto;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity
 @Getter
@@ -16,7 +18,8 @@ public class Reservation {
     private Long id;
     private String reName;
     private String rePhoneNumber;
-    private ReservationTimeDto selectedTime;
+    private String date;
+    private Set<Integer> slotIndex = new TreeSet<>();
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
@@ -27,7 +30,8 @@ public class Reservation {
                 .reName(reservationRequest.getReName())
                 .reName(reservationRequest.getReName())
                 .rePhoneNumber(reservationRequest.getRePhoneNumber())
-                .selectedTime(reservationRequest.getReservationTime())
+                .date(reservationRequest.getDate())
+                .slotIndex(reservationRequest.getSelectedTimeSlot())
                 .build();
     }
 
@@ -36,7 +40,8 @@ public class Reservation {
                 .reName(reservationRequest.getReName())
                 .reName(reservationRequest.getReName())
                 .rePhoneNumber(reservationRequest.getRePhoneNumber())
-                .selectedTime(reservationRequest.getReservationTime())
+                .date(reservationRequest.getDate())
+                .slotIndex(reservationRequest.getSelectedTimeSlot())
                 .room(room)
                 .build();
     }

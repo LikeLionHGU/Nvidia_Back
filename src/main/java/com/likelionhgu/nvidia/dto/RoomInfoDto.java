@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-public class RecommendDto {
+public class RoomInfoDto {
     private Long roomId;
     private List<String> photo;
     private Address address;
@@ -21,8 +21,8 @@ public class RecommendDto {
     private String phoneNumber;
     private int price;
 
-    public static RecommendDto from(Room room){
-        return RecommendDto.builder()
+    public static RoomInfoDto from(Room room){
+        return RoomInfoDto.builder()
                 .roomId(room.getId())
                 .photo(room.getPhotoList())
                 .address(room.getAddress())
