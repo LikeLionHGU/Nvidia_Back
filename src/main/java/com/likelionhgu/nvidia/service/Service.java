@@ -91,7 +91,7 @@ public class Service {
         }
 
         //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-        addressRepository.save(Address.from(request.getAddress()));
+        addressRepository.save(Address.from(request.getAddress());
 
         return "등록 완료";
     }

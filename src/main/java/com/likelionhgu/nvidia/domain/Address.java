@@ -35,9 +35,8 @@ public class Address {
                 .longitude(addressAndPromptRequest.getAddresses().getLongitude())
                 .roadName(addressAndPromptRequest.getAddresses().getRoadName())
                 .build();
-
     }
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "address")
     private Room room;
 }

@@ -20,6 +20,9 @@ public class RoomInfoDto {
     private int maxPeople;
     private String phoneNumber;
     private int price;
+    private String memo;
+    private List<String> chipList;
+    private List<String> optionList;
 
     public static RoomInfoDto from(Room room){
         return RoomInfoDto.builder()
@@ -29,6 +32,9 @@ public class RoomInfoDto {
                 .maxPeople(room.getMaxPeople())
                 .phoneNumber(room.getEnPhoneNumber())
                 .price(room.getPrice())
+                .memo(room.getMemo())
+                .chipList(room.getChipList())
+                .optionList(room.getOptionList())
                 .build();
     }
 }
