@@ -66,13 +66,14 @@ public class Service {
     //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
     public String saveReservation(Long roomId, ReservationRequest request){
         Room room = roomRepository.findByRoomId(roomId);
-        Schedule schedule = scheduleRepository.findByDate(request.getDate());
+        Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, request.getDate());
         schedule.setRePhoneNumber(request.getRePhoneNumber());
 
         if (room != null) {
             Reservation reservation = Reservation.from(room, request);
             reservationRepository.save(reservation);
         }
+
         return "예약 완료";
     }
 
@@ -83,17 +84,21 @@ public class Service {
 //        file
         List<String> fileUrl;
 
+        //TODO: 파일 AWS 서버에 올리는 로직 추가
+        //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
+        addressRepository.save(request.getAddress());
         Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
 
-        //TODO: 빈 리스트 쿼리 안됨 문제 해결 필요
-        List<Schedule> schedules = new ArrayList<>();
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
-            Schedule eachSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
-            schedules.add(eachSchedule);
+            Schedule eachSchedule = scheduleRepository.findByRePhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
+            if(eachSchedule != null){
+                // 해당 날짜의 타임 테이블이 생성돼 있으면 이어서 추가
+                eachSchedule.getSlotIndex().addAll(eachEnrollmentTime.getSelectedTimeSlotIndex());
+            }else{
+                // 해당 날짜의 타임 테이블이 없으면 해당 날짜 Schedule 새로 만듦
+                scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
+            }
         }
-
-        //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-        addressRepository.save(Address.from(request.getAddress());
 
         return "등록 완료";
     }
@@ -104,23 +109,10 @@ public class Service {
         return reservations.stream().map(ReservationDto::from).collect(Collectors.toList());
     }
 
-    public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest){
+    public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
         List<Room> rooms = roomRepository.findByPhoneNumber(passwordRequest.getPhoneNumber());
         return rooms.stream().map(EnrollmentDto::from).collect(Collectors.toList());
 
         //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
-//        List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
-//        for (Room eachRoom : rooms) {
-//            List<Schedule> eachRoomSchedules = eachRoom.getSchedules();
-//            for (Schedule eachSchedule : eachRoomSchedules){
-//                if (eachSchedule){
-//                    EnrollmentDto eachEnrollmentDto = EnrollmentDto.from(eachRoom);
-//                    eachEnrollmentDto.setReservedDate();
-//                }else{
-//
-//                }
-//            }
-//        }
-//        return rooms.stream().map(rooms.stream().map(EnrollmentDto::from).collect(Collectors.toList()));
     }
 }

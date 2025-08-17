@@ -61,6 +61,10 @@ public class Controller {
         return ResponseEntity.ok().body(roomReservationInfoDto);
     }
 
+    // 5-1. 예약페이지를 띄울 때 어떤 날에 예약을 할 수 있는지 표시
+
+    // 5-2. 캘린더에서 날짜 클릭 시 해당 날짜의 타임슬롯 표시 (일단위)
+
     // 6.예약 페이지에서 예약 버튼을 눌러 예약
     @PostMapping("/reservation/done/{roomId}")
     public ResponseEntity<String> doReservation(@PathVariable Long roomId, @RequestBody ReservationRequest request){

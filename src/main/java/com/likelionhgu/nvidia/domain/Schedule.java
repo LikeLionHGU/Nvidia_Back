@@ -1,5 +1,6 @@
 package com.likelionhgu.nvidia.domain;
 
+import com.likelionhgu.nvidia.controller.request.ReservationRequest;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +29,7 @@ public class Schedule {
     public static Schedule make(EnrollmentTimeDto enrollmentTimeDto, Room room) {
         return Schedule.builder()
                 .date(enrollmentTimeDto.getDate())
-                .slotIndex(enrollmentTimeDto.getSelectedTimeSlot())
+                .slotIndex(enrollmentTimeDto.getSelectedTimeSlotIndex())
                 .room(room)
                 .build();
     }
