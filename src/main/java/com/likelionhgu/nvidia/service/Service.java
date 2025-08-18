@@ -151,7 +151,7 @@ public class Service {
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         // 논리 수정 필요 (효율적으로)
         for (Room eachRoom : rooms) {
-            List<Schedule> schedule = scheduleRepository.findByEnPhoneNumber(eachRoom.getEnPhoneNumber());
+            List<Schedule> schedule = scheduleRepository.findByRoomId(eachRoom.getEnPhoneNumber());
             for (Schedule eachSchedule : schedule) {
                 enrollmentDtos.add(EnrollmentDto.from(eachRoom, eachSchedule));
             }

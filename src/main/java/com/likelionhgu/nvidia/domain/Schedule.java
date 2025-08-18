@@ -20,6 +20,7 @@ public class Schedule {
     private Long id;
     private LocalDate date;
     private Set<Integer> slotIndex = new TreeSet<>();
+    private String enPhoneNumber;
     private String rePhoneNumber;
 
     @ManyToOne
@@ -30,6 +31,7 @@ public class Schedule {
         return Schedule.builder()
                 .date(enrollmentTimeDto.getDate())
                 .slotIndex(enrollmentTimeDto.getSelectedTimeSlotIndex())
+                .enPhoneNumber(room.getEnPhoneNumber())
                 .room(room)
                 .build();
     }

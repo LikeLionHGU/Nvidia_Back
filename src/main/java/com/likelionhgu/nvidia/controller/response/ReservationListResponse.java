@@ -6,6 +6,7 @@ import com.likelionhgu.nvidia.domain.Schedule;
 import com.likelionhgu.nvidia.dto.ReservationDto;
 import lombok.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,8 @@ public class ReservationListResponse {
                 .maxPeople(reservationDto.getMaxPeople())
                 .selectedHour(reservationDto.getSelectedHour())
                 .totalPrice(reservationDto.getTotalPrice())
-                .reservedDate(reservationDto.getReservedDate())
+                //TODO: LocalDate -> String 변환시킴. String이어야 하는 이유가 있는지 확인 필요
+                .reservedDate(reservationDto.getReservedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .reservedTime(reservationDto.getReservedTime())
                 .build();
     }
