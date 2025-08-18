@@ -67,8 +67,8 @@ public class Controller {
 
     // 6.예약 페이지에서 예약 버튼을 눌러 예약
     @PostMapping("/reservation/done/{roomId}")
-    public ResponseEntity<String> doReservation(@PathVariable Long roomId, @RequestBody ReservationRequest request){
-        String message = service.saveReservation(roomId, request);
+    public ResponseEntity<String> doReservation(@PathVariable Long roomId, @RequestBody List<ReservationRequest> requests){
+        String message = service.saveReservation(roomId, requests);
         return ResponseEntity.ok().body(message);
     }
 

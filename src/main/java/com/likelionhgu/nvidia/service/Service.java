@@ -12,13 +12,11 @@ import com.likelionhgu.nvidia.repository.ReservationRepository;
 import com.likelionhgu.nvidia.repository.RoomRepository;
 import com.likelionhgu.nvidia.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -70,18 +68,20 @@ public class Service {
         return RoomReservationInfoDto.from(room);
     }
 
-
     // 예약 페이지에 입력된 정보들을 예약 기록(Reservation)으로 저장한다.
     //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
     // 현재는 한 날짜만 받는 걸로 되어 있음. 반복 전송이 아닌 여러 날짜를 한번에 보낸다면 수정 필요 (일단 프론트에게 API 명세서 댓글로 물어봄)
-    public String saveReservation(Long roomId, ReservationRequest request){
-        Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, request.getDate());
-        schedule.setRePhoneNumber(request.getRePhoneNumber());
+    public String saveReservation(Long roomId, List<ReservationRequest> requests){
+        for (ReservationRequest eachRequest : requests){
+            Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, eachRequest.getDate());
+            Room room = roomRepository.findByRoomId(roomId);
+            //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
 
-        Room room = roomRepository.findByRoomId(roomId);
-        if (room != null) {
-            Reservation reservation = Reservation.from(room, request);
-            reservationRepository.save(reservation);
+            if (room != null) {
+                Reservation reservation = Reservation.from(room, eachRequest);
+                reservationRepository.save(reservation);
+                schedule.setRePhoneNumber(eachRequest.getRePhoneNumber());
+            }
         }
 
         return "예약 완료";
