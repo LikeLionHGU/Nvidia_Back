@@ -74,7 +74,8 @@ public class Controller {
 
     // 7.등록 페이지에서 등록 버튼을 눌러 등록
     @PostMapping("/enrollment/done")
-    public ResponseEntity<String> doEnrollment(@RequestBody EnrollmentRequest request, @RequestParam("imageFile") MultipartFile file){
+//    public ResponseEntity<String> doEnrollment(@RequestBody EnrollmentRequest request, @RequestParam("imageFile") MultipartFile file){
+    public ResponseEntity<String> doEnrollment(@RequestPart("request") EnrollmentRequest request, @RequestPart("imageFile") MultipartFile file){
         String message = service.saveEnrollment(request, file);
         return ResponseEntity.ok().body(message);
     }

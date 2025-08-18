@@ -75,7 +75,7 @@ public class Service {
     public String saveReservation(Long roomId, List<ReservationRequest> requests){
         for (ReservationRequest eachRequest : requests){
             Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, eachRequest.getDate());
-            Room room = roomRepository.findByRoomId(roomId);
+            Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
             //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
 
             if (room != null) {
