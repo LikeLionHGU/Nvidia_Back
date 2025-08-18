@@ -1,5 +1,6 @@
 package com.likelionhgu.nvidia.controller.request;
 
+import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import java.util.List;
 public class EnrollmentRequest {
     private String enName;
     private String enPhoneNumber;
-    private String address;
+    private Address address;
     private String account;
     private int maxPeople;
     private int price;

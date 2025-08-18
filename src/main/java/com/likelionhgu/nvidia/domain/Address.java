@@ -29,14 +29,14 @@ public class Address {
     }
 
     //TODO: AddressAndPromptRequest 안의 Address 해결하기
-    public static Address from(AddressAndPromptRequest addressAndPromptRequest){
-        return Address.builder()
-                .latitude(addressAndPromptRequest.getAddresses().getLatitude())
-                .longitude(addressAndPromptRequest.getAddresses().getLongitude())
-                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
-                .build();
-
-    }
+//    public static Address from(AddressAndPromptRequest addressAndPromptRequest){
+//        return Address.builder()
+//                .latitude(addressAndPromptRequest.getAddresses().getLatitude())
+//                .longitude(addressAndPromptRequest.getAddresses().getLongitude())
+//                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
+//                .build();
+//
+//    }
 
     @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
     private Room room;

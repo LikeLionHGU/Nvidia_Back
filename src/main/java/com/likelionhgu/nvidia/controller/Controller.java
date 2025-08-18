@@ -72,11 +72,11 @@ public class Controller {
     }
 
     // 8.예약/등록 확인 모달에서 전화번호 입력 후 확인 버튼 클릭으로 확인 페이지 이동
-    @GetMapping("/reservation/confirmation")
-    public ResponseEntity<ReAndEnDto> checkConfirmation(@RequestBody PasswordRequest passwordRequest){
-        ReAndEnDto ReAndEns = service.accessToRecords(passwordRequest);
-        return ResponseEntity.ok().body(ReAndEns);
-    }
+//    @GetMapping("/reservation/confirmation")
+//    public ResponseEntity<ReAndEnDto> checkConfirmation(@RequestBody PasswordRequest passwordRequest){
+//        ReAndEnDto ReAndEns = service.accessToRecords(passwordRequest);
+//        return ResponseEntity.ok().body(ReAndEns);
+//    }
 
 
 //TODO: 등록 확인, 예약 확인 페이지(탭) 분리 시 api도 아래와 같이 분리

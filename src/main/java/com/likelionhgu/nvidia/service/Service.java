@@ -50,12 +50,14 @@ public class Service {
     }
 
     public RoomInfoDto getTheRoomInfoById(Long roomId){
-        Room room = roomRepository.findByRoomId(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
         return RoomInfoDto.from(room);
     }
 
     public RoomReservationInfoDto getTheRoomReservationInfoById(Long roomId){
-        Room room = roomRepository.findByRoomId(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
         return RoomReservationInfoDto.from(room);
     }
 
@@ -63,7 +65,8 @@ public class Service {
     //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
 
     public String saveReservation(Long roomId, ReservationRequest request){
-        Room room = roomRepository.findByRoomId(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
         Schedule schedule = scheduleRepository.findByDate(request.getDate());
         schedule.setRePhoneNumber(request.getRePhoneNumber());
 
@@ -81,22 +84,22 @@ public class Service {
 //        file
         List<String> fileUrl;
 
-        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
+//        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
 
-        //TODO: LocalDate으로??
-        List<Schedule> schedules = null;
-        for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
-            Schedule eachSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
-            schedules.add(eachSchedule);
-        }
+//        //TODO: LocalDate으로??
+//        List<Schedule> schedules = null;
+//        for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
+//            Schedule eachSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
+//            schedules.add(eachSchedule);
+//        }
 
         //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-        addressRepository.save(Address.from(request.getAddress()));
+//        addressRepository.save(Address.from(request.getAddress()));
 
         return "등록 완료";
     }
 
-    public List<RoomInfoDto> accessToRecords(PasswordRequest passwordRequest){
-
-    }
+//    public List<RoomInfoDto> accessToRecords(PasswordRequest passwordRequest){
+//
+//    }
 }

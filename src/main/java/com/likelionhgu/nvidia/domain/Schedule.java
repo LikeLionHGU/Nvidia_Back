@@ -18,7 +18,7 @@ public class Schedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    private Set<Integer> slotIndex = new TreeSet<>();;
+    private Set<Integer> slotIndex = new TreeSet<>();
     private String rePhoneNumber;
 
     @ManyToOne

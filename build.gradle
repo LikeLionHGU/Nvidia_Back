@@ -38,6 +38,11 @@ dependencies {
     // ai 예외처리시 사용
     implementation 'org.json:json:20210307'
 
+    implementation 'com.google.genai:google-genai:0.7.0'   // 버전은 최신으로 맞추세요
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+
+
 }
 
 tasks.named('test') {

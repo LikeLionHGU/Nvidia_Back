@@ -63,7 +63,7 @@ public class Room {
                 .optionList(request.getOptionList())
                 .chipList(request.getChipList())
                 .photoList(fileUrl)
-                .reservations()
+//                .reservations()
                 .build();
 
     }

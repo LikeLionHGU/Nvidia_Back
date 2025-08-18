@@ -4,6 +4,7 @@ import com.likelionhgu.nvidia.controller.request.ReservationRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -18,7 +19,7 @@ public class Reservation {
     private Long id;
     private String reName;
     private String rePhoneNumber;
-    private String date;
+    private LocalDate date;
     private Set<Integer> slotIndex = new TreeSet<>();
 
     @ManyToOne
