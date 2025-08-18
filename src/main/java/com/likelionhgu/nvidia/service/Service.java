@@ -11,6 +11,7 @@ import com.likelionhgu.nvidia.repository.AddressRepository;
 import com.likelionhgu.nvidia.repository.ReservationRepository;
 import com.likelionhgu.nvidia.repository.RoomRepository;
 import com.likelionhgu.nvidia.repository.ScheduleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,13 +59,13 @@ public class Service {
 
     // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다
     public RoomInfoDto getTheRoomInfoById(Long roomId){
-        Room room = roomRepository.findByRoomId(roomId);
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomInfoDto.from(room);
     }
 
     // 예약 페이지의 정보들을 불러온다
     public RoomReservationInfoDto getTheRoomReservationInfoById(Long roomId){
-        Room room = roomRepository.findByRoomId(roomId);
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomReservationInfoDto.from(room);
     }
 
@@ -147,11 +148,11 @@ public class Service {
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
-        List<Room> rooms = roomRepository.findByPhoneNumber(passwordRequest.getPhoneNumber());
+        List<Room> rooms = roomRepository.findByEnPhoneNumber(passwordRequest.getPhoneNumber());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         // 논리 수정 필요 (효율적으로)
         for (Room eachRoom : rooms) {
-            List<Schedule> schedule = scheduleRepository.findByRoomId(eachRoom.getEnPhoneNumber());
+            List<Schedule> schedule = scheduleRepository.findByEnPhoneNumber(eachRoom.getEnPhoneNumber());
             for (Schedule eachSchedule : schedule) {
                 enrollmentDtos.add(EnrollmentDto.from(eachRoom, eachSchedule));
             }
