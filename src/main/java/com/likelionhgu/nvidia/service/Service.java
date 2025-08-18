@@ -1,5 +1,6 @@
 package com.likelionhgu.nvidia.service;
 
+import com.likelionhgu.nvidia.config.S3Service;
 import com.likelionhgu.nvidia.controller.request.*;
 import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Reservation;
@@ -11,13 +12,19 @@ import com.likelionhgu.nvidia.repository.ReservationRepository;
 import com.likelionhgu.nvidia.repository.RoomRepository;
 import com.likelionhgu.nvidia.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class Service {
+
+    private final S3Service s3Service;
 
     AddressRepository addressRepository;
     RoomRepository roomRepository;
@@ -85,10 +92,19 @@ public class Service {
         //TODO: 파일 AWS 서버에 올리는 로직 추가
 
         // 파일 변환 방법 잊어버림 -> help 자이온!
-//        file
-        List<String> fileUrl =  new ArrayList<>();
+        String uploadUrl = null;
+        Map<String, String> roomPhotoMap = new HashMap<>();
 
-        //TODO: 파일 AWS 서버에 올리는 로직 추가
+        try {
+            uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+            roomPhotoMap= Map.of("uploadUrl",uploadUrl);
+        } catch (IOException e) {
+            roomPhotoMap = Map.of("error","이미지 업로드에 실패했습니다: " + e.getMessage());
+        }
+
+        // TODO: S3Service를 바로 호출하면 됨. S3컨트롤러 필요 없음 (S3ControllerTest.java 삭제할지 결정 필요)
+        List<String> fileUrl = new ArrayList<>(roomPhotoMap.values());
+
         //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
         addressRepository.save(request.getAddress());
         Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
