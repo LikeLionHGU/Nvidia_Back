@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter @Setter
 public class AddressRequest {
-    private String roadName;
     private Double latitude;
     private Double longitude;
 }

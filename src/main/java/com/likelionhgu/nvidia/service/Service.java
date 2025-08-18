@@ -1,105 +1,163 @@
 package com.likelionhgu.nvidia.service;
 
+import com.likelionhgu.nvidia.config.S3Service;
 import com.likelionhgu.nvidia.controller.request.*;
 import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Reservation;
 import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.domain.Schedule;
-import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
-import com.likelionhgu.nvidia.dto.RoomInfoDto;
-import com.likelionhgu.nvidia.dto.RoomReservationInfoDto;
+import com.likelionhgu.nvidia.dto.*;
 import com.likelionhgu.nvidia.repository.AddressRepository;
 import com.likelionhgu.nvidia.repository.ReservationRepository;
 import com.likelionhgu.nvidia.repository.RoomRepository;
 import com.likelionhgu.nvidia.repository.ScheduleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class Service {
+
+    private final S3Service s3Service;
 
     AddressRepository addressRepository;
     RoomRepository roomRepository;
     ReservationRepository reservationRepository;
     ScheduleRepository scheduleRepository;
 
+    //TODO: [AI 적용] 탐색 범위 3km. 해당 범위 벗어나는 공실 제외하도록 구현 필요
+    //TODO: 여기에서 AI를 사용해야 할 것 같다
+
+    // request에 해당하는 공실을 repository에서 찾는다.
     public List<RoomInfoDto> getRooms(AddressRequest request){
-            //TODO: 여기에서 AI를 사용해야 할 것 같다
-        List<RoomInfoDto> recommendRooms = null;
+        List<RoomInfoDto> recommendRooms = new ArrayList<>();
         Room room = roomRepository.findByAddress(Address.from(request));
         recommendRooms.add(RoomInfoDto.from(room));
 
         return recommendRooms;
     }
 
+    // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
+    //TODO: 여기에서 AI를 사용해야 할 것 같다
+    //TODO: 금액 최댓값, 최솟값 사용자가 입력하면 해당 금액 범위 안 공실 탐색하도록 구현 필요
+    //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
     public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptRequest request){
         String prompt = request.getPrompt();
         List<Address> addresses = request.getAddresses();
-        List<RoomInfoDto> recommendRooms = null;
+        List<RoomInfoDto> recommendRooms = new ArrayList<>();
         for (Address eachAddress : addresses) {
-            //TODO: 여기에서 AI를 사용해야 할 것 같다
             Room room = roomRepository.findByAddress(eachAddress);
             recommendRooms.add(RoomInfoDto.from(room));
         }
         return recommendRooms;
     }
 
+    // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다
     public RoomInfoDto getTheRoomInfoById(Long roomId){
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomInfoDto.from(room);
     }
 
+    // 예약 페이지의 정보들을 불러온다
     public RoomReservationInfoDto getTheRoomReservationInfoById(Long roomId){
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomReservationInfoDto.from(room);
     }
 
-
+    // 예약 페이지에 입력된 정보들을 예약 기록(Reservation)으로 저장한다.
     //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
+    // 현재는 한 날짜만 받는 걸로 되어 있음. 반복 전송이 아닌 여러 날짜를 한번에 보낸다면 수정 필요 (일단 프론트에게 API 명세서 댓글로 물어봄)
+    public String saveReservation(Long roomId, List<ReservationRequest> requests){
+        for (ReservationRequest eachRequest : requests){
+            Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, eachRequest.getDate());
+            Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
+            //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
 
-    public String saveReservation(Long roomId, ReservationRequest request){
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방을 찾지 못했습니다."));
-        Schedule schedule = scheduleRepository.findByDate(request.getDate());
-        schedule.setRePhoneNumber(request.getRePhoneNumber());
-
-        if (room != null) {
-            Reservation reservation = Reservation.from(room, request);
-            reservationRepository.save(reservation);
+            if (room != null) {
+                Reservation reservation = Reservation.from(room, eachRequest);
+                reservationRepository.save(reservation);
+                schedule.setRePhoneNumber(eachRequest.getRePhoneNumber());
+            }
         }
+
         return "예약 완료";
     }
 
+    // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
     public String saveEnrollment(EnrollmentRequest request, MultipartFile file){
         //TODO: 파일 AWS 서버에 올리는 로직 추가
 
         // 파일 변환 방법 잊어버림 -> help 자이온!
-//        file
-        List<String> fileUrl;
+        String uploadUrl = null;
+        Map<String, String> roomPhotoMap = new HashMap<>();
 
-//        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
+        try {
+            uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+            roomPhotoMap= Map.of("uploadUrl",uploadUrl);
+        } catch (IOException e) {
+            roomPhotoMap = Map.of("error","이미지 업로드에 실패했습니다: " + e.getMessage());
+        }
 
-//        //TODO: LocalDate으로??
-//        List<Schedule> schedules = null;
-//        for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
-//            Schedule eachSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
-//            schedules.add(eachSchedule);
-//        }
+        // TODO: S3Service를 바로 호출하면 됨. S3컨트롤러 필요 없음 (S3ControllerTest.java 삭제할지 결정 필요)
+        List<String> fileUrl = new ArrayList<>(roomPhotoMap.values());
 
         //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-//        addressRepository.save(Address.from(request.getAddress()));
+        addressRepository.save(request.getAddress());
+        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
+
+        for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
+            Schedule eachSchedule = scheduleRepository.findByEnPhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
+            if(eachSchedule != null){
+                // 해당 날짜의 타임 테이블이 생성돼 있으면 이어서 추가
+                eachSchedule.getSlotIndex().addAll(eachEnrollmentTime.getSelectedTimeSlotIndex());
+            }else{
+                // 해당 날짜의 타임 테이블이 없으면 해당 날짜 Schedule 새로 만듦
+                Schedule newSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
+                targetRoom.getSchedules().add(newSchedule);
+            }
+        }
 
         return "등록 완료";
     }
 
-//    public List<RoomInfoDto> accessToRecords(PasswordRequest passwordRequest){
-//
-//    }
+    // 예약 기록을 확인한다.
+    // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
+    public List<ReservationDto> accessToReservationRecords(PasswordRequest passwordRequest){
+        List<Reservation> reservations = reservationRepository
+                .findByRePhoneNumberOrderByDateAsc(passwordRequest.getPhoneNumber());
+
+        Map<LocalDate, ReservationDto> dtoMap = new LinkedHashMap<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDate date = reservation.getDate();
+
+            dtoMap.computeIfAbsent(date, d -> ReservationDto.from(reservation))
+                    .getReservedTime()
+                    .addAll(reservation.getSlotIndex());
+        }
+
+        return new ArrayList<>(dtoMap.values());
+    }
+
+    // 등록 기록을 확인한다.
+    // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
+    //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
+    public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
+        List<Room> rooms = roomRepository.findByEnPhoneNumber(passwordRequest.getPhoneNumber());
+        List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
+        // 논리 수정 필요 (효율적으로)
+        for (Room eachRoom : rooms) {
+            List<Schedule> schedule = scheduleRepository.findByEnPhoneNumber(eachRoom.getEnPhoneNumber());
+            for (Schedule eachSchedule : schedule) {
+                enrollmentDtos.add(EnrollmentDto.from(eachRoom, eachSchedule));
+            }
+        }
+
+        return enrollmentDtos;
+    }
 }

@@ -11,6 +11,7 @@ import java.util.TreeSet;
 public class ReservationRequest {
     private String reName;
     private String rePhoneNumber;
+    //TODO: API 명세서와 다름. 다른 클래스들에선 LocalDate로 저장해서 이렇게 하는 게 일관성 있다고 판단
     private LocalDate date;
-    private Set<Integer> selectedTimeSlot = new TreeSet<>();
+    private Set<Integer> selectedTimeSlotIndex = new TreeSet<>();
 }

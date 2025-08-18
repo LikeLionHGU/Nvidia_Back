@@ -11,6 +11,7 @@ import java.util.List;
 public class EnrollmentRequest {
     private String enName;
     private String enPhoneNumber;
+    //TODO: 다른 곳에선 모두 Address 타입으로 위도, 경도도 받는데 여기도 그렇게 할지 논의 필요
     private Address address;
     private String account;
     private int maxPeople;

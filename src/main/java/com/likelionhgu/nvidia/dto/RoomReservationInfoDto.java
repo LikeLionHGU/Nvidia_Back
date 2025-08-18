@@ -15,18 +15,32 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class RoomReservationInfoDto {
+    // RoomInfoDto 필드와 동일
     private Long roomId;
-    private String memo;
-    private String account;
+    private List<String> photo;
+    private Address address;
     private int maxPeople;
+    private String phoneNumber;
+    private int price;
+    private String memo;
+    private List<String> chipList;
+    private List<String> optionList;
+    // // RoomInfoDto에서 추가됨
+    private String account;
     private List<Schedule> timeTable;
 
     public static RoomReservationInfoDto from(Room room){
         return RoomReservationInfoDto.builder()
                 .roomId(room.getId())
-                .memo(room.getMemo())
-                .account(room.getAccount())
+                .photo(room.getPhotoList())
+                .address(room.getAddress())
                 .maxPeople(room.getMaxPeople())
+                .phoneNumber(room.getEnPhoneNumber())
+                .price(room.getPrice())
+                .memo(room.getMemo())
+                .chipList(room.getChipList())
+                .optionList(room.getOptionList())
+                .account(room.getAccount())
                 .timeTable(room.getSchedules())
                 .build();
     }
