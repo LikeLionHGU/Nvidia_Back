@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class TestController {
-    private final ChipExtractorService chipExtractorService;
-
-    @GetMapping("/gemini/query")
-    public ResponseEntity<?> query(@RequestBody QueryPrompt queryPrompt){
-        String res = chipExtractorService.extractChips(queryPrompt.getQuery());
-        return ResponseEntity.ok().body(res);
-    }
+//    private final ChipExtractorService chipExtractorService;
+//
+//    @GetMapping("/gemini/query")
+//    public ResponseEntity<?> query(@RequestBody QueryPrompt queryPrompt){
+//        String res = chipExtractorService.extractChips(queryPrompt.getQuery());
+//        return ResponseEntity.ok().body(res);
+//    }
 }
