@@ -19,7 +19,7 @@ public class Reservation {
     private Long id;
     private String reName;
     private String rePhoneNumber;
-    //TODO: API 명세서에는 String으로 되어 있지만 통일성을 위해 LocalDate로 바꿈
+    //TODO: API 명세서에는 String으로 되어 있지만 통일성을 위해 LocalDate로 바꿈 (API 명세서도 바꾸기)
     private LocalDate date;
     private Set<Integer> slotIndex = new TreeSet<>();
 

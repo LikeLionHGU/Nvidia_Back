@@ -24,18 +24,18 @@ public class Address {
         return Address.builder()
                 .latitude(addressRequest.getLatitude())
                 .longitude(addressRequest.getLongitude())
-                .roadName(addressRequest.getRoadName())
+                .roadName("") //도로명주소는 주지 않음 (1번, 2번)
                 .build();
     }
 
     //TODO: AddressAndPromptRequest 안의 Address 해결하기
-    public static Address from(AddressAndPromptRequest addressAndPromptRequest){
-        return Address.builder()
-                .latitude(addressAndPromptRequest.getAddresses().getLatitude())
-                .longitude(addressAndPromptRequest.getAddresses().getLongitude())
-                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
-                .build();
-    }
+//    public static Address from(AddressAndPromptRequest addressAndPromptRequest){
+//        return Address.builder()
+//                .latitude(addressAndPromptRequest.getAddresses().getLatitude())
+//                .longitude(addressAndPromptRequest.getAddresses().getLongitude())
+//                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
+//                .build();
+//    }
 
     @OneToOne(mappedBy = "address")
     private Room room;

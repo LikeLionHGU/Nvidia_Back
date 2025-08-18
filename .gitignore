@@ -37,3 +37,6 @@ out/
 .vscode/
 
 /src/main/resources/application.yaml
+
+### 효율적인 코드 수정 전&후 저장 노트 ###
+/development/

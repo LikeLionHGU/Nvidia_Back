@@ -18,6 +18,7 @@ public class EnrollmentListResponse {
     private String account;
     private int maxPeople;
     private int price;
+    //TODO: LocalDate로 안 해도 되는지 확인
     private String enrolledDate;
     private String enrolledTime;
 

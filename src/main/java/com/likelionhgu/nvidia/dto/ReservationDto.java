@@ -7,8 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Getter @Setter
 @AllArgsConstructor
@@ -22,7 +24,7 @@ public class ReservationDto {
     private int maxPeople;
     private int totalPrice; // 단위 가격 * 시간 (총 가격)
     private int selectedHour;
-    private String reservedDate;
+    private LocalDate reservedDate;
     //TODO: String이 아닌 시간 슬롯을 보내주는 게 맞는 것 같아 수정했는데 확인 필요
     private Set<Integer> reservedTime;
 
