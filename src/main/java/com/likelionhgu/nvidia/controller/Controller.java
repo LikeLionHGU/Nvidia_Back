@@ -33,12 +33,10 @@ public class Controller {
         return ResponseEntity.ok().body(recommendsDto);
     }
 
-    // 2.주소 검색 시 결과에 해당하는 장소 추천
-    @GetMapping("/search")
-    public ResponseEntity<List<RoomInfoDto>> searchByWords(@RequestBody AddressRequest address){
-        List<RoomInfoDto> recommendsDto = service.getRooms(address);
-        return ResponseEntity.ok().body(recommendsDto);
-    }
+    // 2-1. 좌측 사이드바 검색창에서 Step1 끝낸 직후 중간 위치 전송
+    @PostMapping("/search/middle")
+    public ResponseEntity<List<RoomInfoDto>> searchMiddle(@RequestBody AddressRequest address){}
+
 
     // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천 (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
     @GetMapping("/recommend")
