@@ -16,7 +16,7 @@ import java.util.List;
 public class RoomInfoDto {
     private Long roomId;
     private List<String> photo;
-    private Address address;
+    private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
     private int price;
@@ -28,7 +28,7 @@ public class RoomInfoDto {
         return RoomInfoDto.builder()
                 .roomId(room.getId())
                 .photo(room.getPhotoList())
-                .address(room.getAddress())
+                .address(AddressDto.from(room.getAddress()))
                 .maxPeople(room.getMaxPeople())
                 .phoneNumber(room.getEnPhoneNumber())
                 .price(room.getPrice())

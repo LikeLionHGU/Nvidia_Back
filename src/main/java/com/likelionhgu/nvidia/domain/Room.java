@@ -35,8 +35,10 @@ public class Room {
     private String memo;
 
 //    @Convert(converter = IntegerSetConverter.class)
+    @Column(length = 2000)
     private List<String> optionList = new ArrayList<>();
 //    @Convert(converter = IntegerSetConverter.class)
+    @Column(length = 2000)
     private List<String> chipList = new ArrayList<>();
 //    @Convert(converter = IntegerSetConverter.class)
     @Column(length = 2000)

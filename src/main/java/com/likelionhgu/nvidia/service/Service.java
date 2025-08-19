@@ -36,7 +36,8 @@ public class Service {
     // request에 해당하는 공실을 repository에서 찾는다.
     public List<RoomInfoDto> getRooms(AddressRequest request){
         List<RoomInfoDto> recommendRooms = new ArrayList<>();
-        Room room = roomRepository.findByAddress(Address.from(request));
+        Address targetAddress = addressRepository.findByLatitudeAndLongitude(request.getLatitude(), request.getLongitude());
+        Room room = roomRepository.findByAddress(targetAddress);
         recommendRooms.add(RoomInfoDto.from(room));
 
         return recommendRooms;

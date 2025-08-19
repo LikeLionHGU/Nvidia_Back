@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class RoomReservationInfoDto {
     // RoomInfoDto 필드와 동일
     private Long roomId;
     private List<String> photo;
-    private Address address;
+    private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
     private int price;
@@ -27,13 +28,13 @@ public class RoomReservationInfoDto {
     private List<String> optionList;
     // // RoomInfoDto에서 추가됨
     private String account;
-    private List<Schedule> timeTable;
+    private List<ScheduleDto> timeTable;
 
     public static RoomReservationInfoDto from(Room room){
         return RoomReservationInfoDto.builder()
                 .roomId(room.getId())
                 .photo(room.getPhotoList())
-                .address(room.getAddress())
+                .address(AddressDto.from(room.getAddress()))
                 .maxPeople(room.getMaxPeople())
                 .phoneNumber(room.getEnPhoneNumber())
                 .price(room.getPrice())
@@ -41,7 +42,7 @@ public class RoomReservationInfoDto {
                 .chipList(room.getChipList())
                 .optionList(room.getOptionList())
                 .account(room.getAccount())
-                .timeTable(room.getSchedules())
+                .timeTable(room.getSchedules().stream().map(ScheduleDto::from).collect(Collectors.toList()))
                 .build();
     }
 }

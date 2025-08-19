@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: AddressDto는 무한참조를 끊기 위해 Address를 담는 용도로 사용하므로, 기존 Dto를 CoordinateAddressDto로 수정함
+
 @Service
 @RequiredArgsConstructor
 public class FunctionService {

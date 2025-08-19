@@ -55,7 +55,7 @@ public class Controller {
 
     // 5.예약하러 가기 버튼 클릭 시 예약 페이지 이동
     @GetMapping("/reservation/{roomId}")
-    public ResponseEntity<RoomReservationInfoDto> enterReservationPage(@PathVariable Long roomId, @RequestBody ReservationRequest request){
+    public ResponseEntity<RoomReservationInfoDto> enterReservationPage(@PathVariable Long roomId){
         RoomReservationInfoDto roomReservationInfoDto = service.getTheRoomReservationInfoById(roomId);
         return ResponseEntity.ok().body(roomReservationInfoDto);
     }

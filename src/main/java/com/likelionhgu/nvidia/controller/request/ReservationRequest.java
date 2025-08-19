@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Getter @Setter
+//TODO: API 명세서에는 변수명에 "re"가 없음. 수정해야 하는지 확인 필요
 public class ReservationRequest {
     private String reName;
     private String rePhoneNumber;

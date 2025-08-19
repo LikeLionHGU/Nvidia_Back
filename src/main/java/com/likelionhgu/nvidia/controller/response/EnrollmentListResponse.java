@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.controller.response;
 
 import com.likelionhgu.nvidia.domain.Address;
+import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.EnrollmentDto;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.TreeSet;
 @Builder
 public class EnrollmentListResponse {
     private String enPhoneNumber;
-    private Address address;
+    private AddressDto address;
     private String account;
     private int maxPeople;
     private int price;
@@ -27,7 +28,7 @@ public class EnrollmentListResponse {
     public static EnrollmentListResponse from(EnrollmentDto enrollmentDto) {
         return EnrollmentListResponse.builder()
                 .enPhoneNumber(enrollmentDto.getPhoneNumber())
-                .address(Address.from(enrollmentDto.getAddress()))
+                .address(enrollmentDto.getAddress())
                 .account(enrollmentDto.getAccount())
                 .maxPeople(enrollmentDto.getMaxPeople())
                 .price(enrollmentDto.getPrice())
