@@ -1,9 +1,7 @@
 package com.likelionhgu.nvidia.controller;
 
 import com.likelionhgu.nvidia.controller.request.*;
-import com.likelionhgu.nvidia.controller.response.EnrollmentListResponse;
-import com.likelionhgu.nvidia.controller.response.MiddleAddressResponse;
-import com.likelionhgu.nvidia.controller.response.ReservationListResponse;
+import com.likelionhgu.nvidia.controller.response.*;
 import com.likelionhgu.nvidia.dto.*;
 import com.likelionhgu.nvidia.service.Service;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +37,6 @@ public class Controller {
         return ResponseEntity.ok().body(MiddleAddressResponse.from(coordinateAddressDto));
     }
 
-
     // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천 (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
     //TODO: 단일 위치 반환 / 중간 위치 계산 로직 구현 필요
     //TODO: 가격 낮은 순으로 필터링해서 보내기
@@ -64,8 +61,18 @@ public class Controller {
     }
 
     // 5-1. 예약페이지를 띄울 때 어떤 날에 예약을 할 수 있는지 표시
+    @GetMapping("/reservation/available/days/{roomId}")
+    public ResponseEntity<AvailableDaysResponse> availableDaysOfTheMonth(@PathVariable Long roomId, @RequestBody MonthRequest request){
+        AvailableDaysDto availableDaysDto = service.getAvailableDays(roomId, request);
+        return ResponseEntity.ok().body(AvailableDaysResponse.from(availableDaysDto));
+    }
 
     // 5-2. 캘린더에서 날짜 클릭 시 해당 날짜의 타임슬롯 표시 (일단위)
+    @GetMapping("/reservation/available/timeslots/{roomId}")
+    public  ResponseEntity<AvailableTimeSlotsResponse> availableTimeSlotsOfTheDay(@PathVariable Long roomId, @RequestBody MonthAndDayRequest request){
+        AvailableTimeSlotsDto availableTimeSlotsDto = service.getAvailableTimeSlots(roomId, request);
+        return ResponseEntity.ok().body(AvailableTimeSlotsResponse.from(availableTimeSlotsDto));
+    }
 
     // 6.예약 페이지에서 예약 버튼을 눌러 예약
     @PostMapping("/reservation/done/{roomId}")

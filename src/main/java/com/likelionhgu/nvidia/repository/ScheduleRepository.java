@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByEnPhoneNumber(String enPhoneNumber);
+    List<Schedule> findByRoomIdAndDateBetween(Long roomId,LocalDate start, LocalDate end);
     Schedule findByEnPhoneNumberAndDate(String enPhoneNumber, LocalDate date);
     Schedule findByRoomIdAndDate(Long roomId, LocalDate date);
 }

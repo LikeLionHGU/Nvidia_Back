@@ -65,6 +65,8 @@ public class Service {
     //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
     public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptRequest request){
         String prompt = request.getPrompt();
+        //TODO: request 안에 maxPrice, minPrice 있으니 사용 필요
+
         List<Address> addresses = request.getAddresses();
         List<RoomInfoDto> recommendRooms = new ArrayList<>();
         for (Address eachAddress : addresses) {
@@ -74,17 +76,38 @@ public class Service {
         return recommendRooms;
     }
 
-    // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다
+    // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다.
     public RoomInfoDto getTheRoomInfoById(Long roomId){
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomInfoDto.from(room);
     }
 
-    // 예약 페이지의 정보들을 불러온다
+    // 예약 페이지의 정보들을 불러온다.
     public RoomReservationInfoDto getTheRoomReservationInfoById(Long roomId){
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
         return RoomReservationInfoDto.from(room);
     }
+
+    // 입력받은(캘린더에서 선택한) 달의 등록된 일들을 불러온다.
+    public AvailableDaysDto getAvailableDays(Long roomId, MonthRequest request){
+        int thisYear = LocalDate.now().getYear();
+        LocalDate startDate = LocalDate.of(thisYear, request.getMonth(), 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        List<Schedule> schedules = scheduleRepository.findByRoomIdAndDateBetween(roomId, startDate, endDate);
+
+        return AvailableDaysDto.from(schedules);
+    }
+
+    // 입력받은(캘린더에서 선택한) 일의 등록된 시간 슬롯을 불러온다.
+    public AvailableTimeSlotsDto getAvailableTimeSlots(Long roomId, MonthAndDayRequest request){
+        int thisYear = LocalDate.now().getYear();
+        LocalDate targetDate = LocalDate.of(thisYear, request.getMonth(), request.getDay());
+        Schedule schedules = scheduleRepository.findByRoomIdAndDate(roomId, targetDate);
+
+        return AvailableTimeSlotsDto.from(schedules);
+    }
+
+
 
     // 예약 페이지에 입력된 정보들을 예약 기록(Reservation)으로 저장한다.
     //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요

@@ -1,6 +1,5 @@
 package com.likelionhgu.nvidia.domain;
 
-import com.likelionhgu.nvidia.controller.request.AddressAndPromptRequest;
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +23,7 @@ public class Address {
         return Address.builder()
                 .latitude(addressRequest.getLatitude())
                 .longitude(addressRequest.getLongitude())
-                .roadName(null) //도로명주소는 주지 않음 (1번, 2번)
+                .roadName(null)
                 .build();
     }
 

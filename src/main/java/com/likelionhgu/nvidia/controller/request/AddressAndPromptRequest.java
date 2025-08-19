@@ -10,4 +10,6 @@ import java.util.List;
 public class AddressAndPromptRequest {
     private List<Address> addresses;
     private String prompt;
+    private int maxPrice;
+    private int minPrice;
 }

@@ -5,8 +5,8 @@ import com.likelionhgu.nvidia.dto.EnrollmentDto;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,9 +21,7 @@ public class EnrollmentListResponse {
     private String account;
     private int maxPeople;
     private int price;
-    //TODO: LocalDate로 안 해도 되는지 확인. String이 필요한지 파악 필요.
-    private String enrolledDate;
-    //TODO: enrolledTime String -> Set<Integer>로 변경. 문제 없는지 확인 필요 (API 명세)
+    private LocalDate enrolledDate;
     private Set<Integer> enrolledTime  = new TreeSet<>();
 
     public static EnrollmentListResponse from(EnrollmentDto enrollmentDto) {
@@ -33,7 +31,7 @@ public class EnrollmentListResponse {
                 .account(enrollmentDto.getAccount())
                 .maxPeople(enrollmentDto.getMaxPeople())
                 .price(enrollmentDto.getPrice())
-                .enrolledDate(enrollmentDto.getEnrolledDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .enrolledDate(enrollmentDto.getEnrolledDate())
                 .enrolledTime(enrollmentDto.getEnrolledTime())
                 .build();
     }
