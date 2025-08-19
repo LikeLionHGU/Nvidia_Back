@@ -27,7 +27,7 @@ public class EnrollmentListResponse {
     public static EnrollmentListResponse from(EnrollmentDto enrollmentDto) {
         return EnrollmentListResponse.builder()
                 .enPhoneNumber(enrollmentDto.getPhoneNumber())
-                .address(enrollmentDto.getAddress())
+                .address(Address.from(enrollmentDto.getAddress()))
                 .account(enrollmentDto.getAccount())
                 .maxPeople(enrollmentDto.getMaxPeople())
                 .price(enrollmentDto.getPrice())

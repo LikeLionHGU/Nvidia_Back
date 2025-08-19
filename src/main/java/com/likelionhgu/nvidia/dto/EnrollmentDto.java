@@ -16,7 +16,7 @@ import java.util.TreeSet;
 @Builder
 public class EnrollmentDto {
     private Long roomId;
-    private Address address;
+    private AddressDto address;
     private String phoneNumber;
     private String account;
     private int maxPeople;
@@ -28,7 +28,7 @@ public class EnrollmentDto {
     public static EnrollmentDto from(Room room, Schedule schedule) {
         return EnrollmentDto.builder()
                 .roomId(room.getId())
-                .address(room.getAddress())
+                .address(AddressDto.from(room.getAddress()))
                 .phoneNumber(room.getEnPhoneNumber())
                 .account(room.getAccount())
                 .maxPeople(room.getMaxPeople())

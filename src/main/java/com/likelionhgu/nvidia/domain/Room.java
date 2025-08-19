@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.domain;
 
 import com.likelionhgu.nvidia.controller.request.EnrollmentRequest;
+import com.likelionhgu.nvidia.converter.IntegerSetConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,8 +34,12 @@ public class Room {
     @Column(length = 2000)
     private String memo;
 
+//    @Convert(converter = IntegerSetConverter.class)
     private List<String> optionList = new ArrayList<>();
+//    @Convert(converter = IntegerSetConverter.class)
     private List<String> chipList = new ArrayList<>();
+//    @Convert(converter = IntegerSetConverter.class)
+    @Column(length = 2000)
     private List<String> photoList = new ArrayList<>();
 
     @OneToMany(
@@ -42,6 +47,7 @@ public class Room {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL
     )
+    @Builder.Default
     private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(
@@ -49,6 +55,7 @@ public class Room {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL
     )
+    @Builder.Default
     private List<Schedule> schedules = new ArrayList<>();
 
     public static Room make(EnrollmentRequest request, List<String> fileUrl){

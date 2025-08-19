@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.dto;
 
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
+import com.likelionhgu.nvidia.domain.Address;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,20 +10,15 @@ import lombok.Setter;
 @Setter
 @Builder
 public class AddressDto {
+    private String roadName;
     private double latitude;
     private double longitude;
 
-    public static AddressDto from(AddressRequest addressRequest){
+    public static AddressDto from(Address address){
         return AddressDto.builder()
-                .latitude(addressRequest.getLatitude())
-                .longitude(addressRequest.getLongitude())
-                .build();
-    }
-
-    public static AddressDto from(double latitude, double longitude){
-        return AddressDto.builder()
-                .latitude(latitude)
-                .longitude(longitude)
+                .roadName(address.getRoadName())
+                .latitude(address.getLatitude())
+                .longitude(address.getLongitude())
                 .build();
     }
 }

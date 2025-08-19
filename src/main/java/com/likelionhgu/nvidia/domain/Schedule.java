@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.domain;
 
 import com.likelionhgu.nvidia.controller.request.ReservationRequest;
+import com.likelionhgu.nvidia.converter.IntegerSetConverter;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +20,7 @@ public class Schedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+//    @Convert(converter = IntegerSetConverter.class)
     private Set<Integer> slotIndex = new TreeSet<>();
     private String enPhoneNumber;
     private String rePhoneNumber;

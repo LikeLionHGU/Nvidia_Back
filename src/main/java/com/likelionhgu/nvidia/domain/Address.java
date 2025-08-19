@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.domain;
 
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
+import com.likelionhgu.nvidia.dto.AddressDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,11 +20,22 @@ public class Address {
     private double longitude;
     private String roadName;
 
+    @OneToOne(mappedBy = "address")
+    private Room room;
+
     public static Address from(AddressRequest addressRequest){
         return Address.builder()
                 .latitude(addressRequest.getLatitude())
                 .longitude(addressRequest.getLongitude())
                 .roadName(null)
+                .build();
+    }
+
+    public static Address from(AddressDto addressDto){
+        return Address.builder()
+                .latitude(addressDto.getLatitude())
+                .longitude(addressDto.getLongitude())
+                .roadName(addressDto.getRoadName())
                 .build();
     }
 
@@ -35,7 +47,4 @@ public class Address {
 //                .roadName(addressAndPromptRequest.getAddresses().getRoadName())
 //                .build();
 //    }
-
-    @OneToOne(mappedBy = "address")
-    private Room room;
 }

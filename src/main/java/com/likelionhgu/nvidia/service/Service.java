@@ -25,10 +25,10 @@ public class Service {
 
     private final S3Service s3Service;
 
-    AddressRepository addressRepository;
-    RoomRepository roomRepository;
-    ReservationRepository reservationRepository;
-    ScheduleRepository scheduleRepository;
+    private final AddressRepository addressRepository;
+    private final RoomRepository roomRepository;
+    private final ReservationRepository reservationRepository;
+    private final ScheduleRepository scheduleRepository;
 
     //TODO: [AI 적용] 탐색 범위 3km. 해당 범위 벗어나는 공실 제외하도록 구현 필요
     //TODO: 여기에서 AI를 사용해야 할 것 같다
@@ -47,7 +47,7 @@ public class Service {
         int number = request.getAddressList().size();
 
         if (number == 1){
-            return CoordinateAddressDto.from(request.getAddressList().get(0));
+            return request.getAddressList().get(0);
         }
 
         double totalLatitude = 0;
@@ -154,7 +154,9 @@ public class Service {
                 eachSchedule.getSlotIndex().addAll(eachEnrollmentTime.getSelectedTimeSlotIndex());
             }else{
                 // 해당 날짜의 타임 테이블이 없으면 해당 날짜 Schedule 새로 만듦
-                Schedule newSchedule = scheduleRepository.save(Schedule.make(eachEnrollmentTime, targetRoom));
+                Schedule newSchedule = Schedule.make(eachEnrollmentTime, targetRoom);
+                newSchedule.setRoom(targetRoom);
+                scheduleRepository.save(newSchedule);
                 targetRoom.getSchedules().add(newSchedule);
             }
         }
@@ -185,15 +187,16 @@ public class Service {
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
-        List<Room> rooms = roomRepository.findByEnPhoneNumber(passwordRequest.getPhoneNumber());
+        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
+//        List<Room> rooms = roomRepository.findByEnPhoneNumber(passwordRequest.getPhoneNumber());
+        System.out.println(rooms.size());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
-        // 논리 수정 필요 (효율적으로)
         for (Room eachRoom : rooms) {
-            List<Schedule> schedule = scheduleRepository.findByEnPhoneNumber(eachRoom.getEnPhoneNumber());
-            for (Schedule eachSchedule : schedule) {
+            for (Schedule eachSchedule : eachRoom.getSchedules()) {
                 enrollmentDtos.add(EnrollmentDto.from(eachRoom, eachSchedule));
             }
         }
+        System.out.println(enrollmentDtos.size());
 
         return enrollmentDtos;
     }

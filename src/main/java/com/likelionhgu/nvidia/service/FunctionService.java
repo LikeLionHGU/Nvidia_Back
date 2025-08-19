@@ -5,7 +5,6 @@ import com.likelionhgu.nvidia.controller.request.AddressRequest;
 import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Chip;
 import com.likelionhgu.nvidia.domain.Room;
-import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.CoordinateAddressDto;
 import com.likelionhgu.nvidia.repository.AddressRepository;
 import com.likelionhgu.nvidia.repository.RoomRepository;
@@ -41,18 +40,18 @@ public class FunctionService {
 
 
 
-    public AddressDto midAvg(List<AddressDto> list) {
+    public CoordinateAddressDto midAvg(List<CoordinateAddressDto> list) {
         if (list == null || list.isEmpty()) throw new IllegalArgumentException("비어 있음");
         double latSum = 0, lonSum = 0;
         int n = 0;
-        for (AddressDto a : list) {
+        for (CoordinateAddressDto a : list) {
             if (a == null) continue;
             latSum += a.getLatitude();
             lonSum += a.getLongitude();
             n++;
         }
         if (n == 0) throw new IllegalArgumentException("유효 항목 없음");
-        AddressDto dto = AddressDto.builder()
+        CoordinateAddressDto dto = CoordinateAddressDto.builder()
                 .latitude(latSum / n)
                 .longitude(lonSum / n)
                 .build();
@@ -63,8 +62,8 @@ public class FunctionService {
     public List<Room> findRoomBy3km(List<AddressRequest> addressRequestList){
         List<Address> addressList = addressRepository.findAll();
 
-        List<AddressDto> addressDtoList = addressRequestList.stream().map(AddressDto::from).toList();
-        AddressDto dto = midAvg(addressDtoList);
+        List<CoordinateAddressDto> coordinateAddressDtoList = addressRequestList.stream().map(CoordinateAddressDto::from).toList();
+        CoordinateAddressDto dto = midAvg(coordinateAddressDtoList);
         double centerLat = dto.getLatitude(); // center latitude
         double centerLon = dto.getLongitude(); // center longitude
 
