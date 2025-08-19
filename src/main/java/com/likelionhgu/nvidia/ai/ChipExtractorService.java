@@ -1,9 +1,8 @@
 // src/main/java/com/likelionhgu/nvidia/service/ChipExtractorService.java
-package com.likelionhgu.nvidia.service;
+package com.likelionhgu.nvidia.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelionhgu.nvidia.controller.TestController.ChipsResponse;
 import com.likelionhgu.nvidia.domain.Chip;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
