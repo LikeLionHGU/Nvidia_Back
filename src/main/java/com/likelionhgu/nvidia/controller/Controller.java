@@ -2,11 +2,9 @@ package com.likelionhgu.nvidia.controller;
 
 import com.likelionhgu.nvidia.controller.request.*;
 import com.likelionhgu.nvidia.controller.response.EnrollmentListResponse;
+import com.likelionhgu.nvidia.controller.response.MiddleAddressResponse;
 import com.likelionhgu.nvidia.controller.response.ReservationListResponse;
-import com.likelionhgu.nvidia.dto.EnrollmentDto;
-import com.likelionhgu.nvidia.dto.ReservationDto;
-import com.likelionhgu.nvidia.dto.RoomInfoDto;
-import com.likelionhgu.nvidia.dto.RoomReservationInfoDto;
+import com.likelionhgu.nvidia.dto.*;
 import com.likelionhgu.nvidia.service.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,10 +33,16 @@ public class Controller {
 
     // 2-1. 좌측 사이드바 검색창에서 Step1 끝낸 직후 중간 위치 전송
     @PostMapping("/search/middle")
-    public ResponseEntity<List<RoomInfoDto>> searchMiddle(@RequestBody AddressRequest address){}
+    //TODO: 중간 위치 계산 로직 구현 필요
+    public ResponseEntity<MiddleAddressResponse> searchMiddle(@RequestBody AddressesForMiddleRequest request){
+        CoordinateAddressDto coordinateAddressDto = service.calculateMidpoint(request);
+        return ResponseEntity.ok().body(MiddleAddressResponse.from(coordinateAddressDto));
+    }
 
 
     // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천 (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
+    //TODO: 단일 위치 반환 / 중간 위치 계산 로직 구현 필요
+    //TODO: 가격 낮은 순으로 필터링해서 보내기
     @GetMapping("/recommend")
     public ResponseEntity<List<RoomInfoDto>> recommendAboutPrompt(@RequestBody AddressAndPromptRequest AddressAndPrompt){
         List<RoomInfoDto> recommendsDto = service.getRoomsWithPrompt(AddressAndPrompt);
@@ -71,6 +75,7 @@ public class Controller {
     }
 
     // 7.등록 페이지에서 등록 버튼을 눌러 등록
+    //TODO: 시간 전체 선택 로직 구현 필요 (전체 선택 후 일부 제거 경우도 고려 필요)
     @PostMapping("/enrollment/done")
 //    public ResponseEntity<String> doEnrollment(@RequestBody EnrollmentRequest request, @RequestParam("imageFile") MultipartFile file){
     public ResponseEntity<String> doEnrollment(@RequestPart("request") EnrollmentRequest request, @RequestPart("imageFile") MultipartFile file){
