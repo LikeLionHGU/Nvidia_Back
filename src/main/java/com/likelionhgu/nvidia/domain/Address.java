@@ -24,7 +24,7 @@ public class Address {
         return Address.builder()
                 .latitude(addressRequest.getLatitude())
                 .longitude(addressRequest.getLongitude())
-                .roadName("") //도로명주소는 주지 않음 (1번, 2번)
+                .roadName(null) //도로명주소는 주지 않음 (1번, 2번)
                 .build();
     }
 

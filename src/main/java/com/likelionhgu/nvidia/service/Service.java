@@ -42,6 +42,23 @@ public class Service {
         return recommendRooms;
     }
 
+    // 받은 주소 리스트들의 중간 주소를 계산한다.
+    public CoordinateAddressDto calculateMidpoint(AddressesForMiddleRequest request){
+        int number = request.getAddressList().size();
+
+        if (number == 1){
+            return CoordinateAddressDto.from(request.getAddressList().get(0));
+        }
+
+        double totalLatitude = 0;
+        double totalLongitude = 0;
+        for (CoordinateAddressDto eachAddressDto: request.getAddressList()){
+            totalLatitude += eachAddressDto.getLatitude();
+            totalLongitude += eachAddressDto.getLongitude();
+        }
+        return CoordinateAddressDto.from(totalLatitude / number, totalLongitude / number);
+    }
+
     // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
     //TODO: 여기에서 AI를 사용해야 할 것 같다
     //TODO: 금액 최댓값, 최솟값 사용자가 입력하면 해당 금액 범위 안 공실 탐색하도록 구현 필요
@@ -90,9 +107,6 @@ public class Service {
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
     public String saveEnrollment(EnrollmentRequest request, MultipartFile file){
-        //TODO: 파일 AWS 서버에 올리는 로직 추가
-
-        // 파일 변환 방법 잊어버림 -> help 자이온!
         String uploadUrl = null;
         Map<String, String> roomPhotoMap = new HashMap<>();
 
