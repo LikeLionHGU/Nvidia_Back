@@ -1,4 +1,4 @@
-package com.likelionhgu.nvidia.controller;
+package com.likelionhgu.nvidia.ai;
 
 import lombok.Getter;
 import lombok.Setter;
