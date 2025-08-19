@@ -34,13 +34,16 @@ public class Room {
     @Column(length = 2000)
     private String memo;
 
-//    @Convert(converter = IntegerSetConverter.class)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @OrderColumn
     @Column(length = 2000)
     private List<String> optionList = new ArrayList<>();
-//    @Convert(converter = IntegerSetConverter.class)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @OrderColumn
     @Column(length = 2000)
     private List<String> chipList = new ArrayList<>();
-//    @Convert(converter = IntegerSetConverter.class)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @OrderColumn
     @Column(length = 2000)
     private List<String> photoList = new ArrayList<>();
 

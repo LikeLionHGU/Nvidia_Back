@@ -20,7 +20,7 @@ public class Schedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-//    @Convert(converter = IntegerSetConverter.class)
+    @ElementCollection(fetch = FetchType.LAZY)
     private Set<Integer> slotIndex = new TreeSet<>();
     private String enPhoneNumber;
     private String rePhoneNumber;

@@ -19,10 +19,10 @@ public class RoomInfoDto {
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
-    private int price;
     private String memo;
     private List<String> chipList;
     private List<String> optionList;
+    private int price;
 
     public static RoomInfoDto from(Room room){
         return RoomInfoDto.builder()

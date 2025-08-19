@@ -1,7 +1,6 @@
 package com.likelionhgu.nvidia.dto;
 
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
-import com.likelionhgu.nvidia.controller.request.AddressesForMiddleRequest;
 import com.likelionhgu.nvidia.domain.Address;
 import lombok.*;
 

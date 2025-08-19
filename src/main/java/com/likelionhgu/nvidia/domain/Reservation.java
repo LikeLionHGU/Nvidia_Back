@@ -22,7 +22,7 @@ public class Reservation {
     private String rePhoneNumber;
     //TODO: API 명세서에는 String으로 되어 있지만 통일성을 위해 LocalDate로 바꿈 (API 명세서도 바꾸기)
     private LocalDate date;
-//    @Convert(converter = IntegerSetConverter.class)
+    @ElementCollection(fetch = FetchType.LAZY)
     private Set<Integer> slotIndex = new TreeSet<>();
 
     @ManyToOne

@@ -41,7 +41,7 @@ public class Controller {
     //TODO: 단일 위치 반환 / 중간 위치 계산 로직 구현 필요
     //TODO: 가격 낮은 순으로 필터링해서 보내기
     @GetMapping("/recommend")
-    public ResponseEntity<List<RoomInfoDto>> recommendAboutPrompt(@RequestBody AddressAndPromptRequest AddressAndPrompt){
+    public ResponseEntity<List<RoomInfoDto>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
         List<RoomInfoDto> recommendsDto = service.getRoomsWithPrompt(AddressAndPrompt);
         return ResponseEntity.ok().body(recommendsDto);
     }

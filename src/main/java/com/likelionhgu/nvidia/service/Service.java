@@ -64,14 +64,14 @@ public class Service {
     //TODO: 여기에서 AI를 사용해야 할 것 같다
     //TODO: 금액 최댓값, 최솟값 사용자가 입력하면 해당 금액 범위 안 공실 탐색하도록 구현 필요
     //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
-    public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptRequest request){
+    public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
         String prompt = request.getPrompt();
         //TODO: request 안에 maxPrice, minPrice 있으니 사용 필요
 
         List<Address> addresses = request.getAddresses();
         List<RoomInfoDto> recommendRooms = new ArrayList<>();
         for (Address eachAddress : addresses) {
-            Room room = roomRepository.findByAddress(eachAddress);
+            Room room = roomRepository.findByAddressAndPriceBetween(eachAddress, request.getMinPrice(), request.getMaxPrice());
             recommendRooms.add(RoomInfoDto.from(room));
         }
         return recommendRooms;
@@ -130,6 +130,7 @@ public class Service {
     }
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
+    //TODO: 한 날짜 시간 슬롯 전체 선택 기능도 구현 필요
     public String saveEnrollment(EnrollmentRequest request, MultipartFile file){
         String uploadUrl = null;
         Map<String, String> roomPhotoMap = new HashMap<>();
@@ -153,6 +154,7 @@ public class Service {
             if(eachSchedule != null){
                 // 해당 날짜의 타임 테이블이 생성돼 있으면 이어서 추가
                 eachSchedule.getSlotIndex().addAll(eachEnrollmentTime.getSelectedTimeSlotIndex());
+                scheduleRepository.save(eachSchedule);
             }else{
                 // 해당 날짜의 타임 테이블이 없으면 해당 날짜 Schedule 새로 만듦
                 Schedule newSchedule = Schedule.make(eachEnrollmentTime, targetRoom);

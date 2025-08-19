@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Getter @Setter
-public class AddressAndPromptRequest {
+public class AddressAndPromptAndPricesRequest {
     private List<Address> addresses;
     private String prompt;
     private int maxPrice;
