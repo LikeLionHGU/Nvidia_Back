@@ -31,10 +31,8 @@ public class Service {
     private final ReservationRepository reservationRepository;
     private final ScheduleRepository scheduleRepository;
 
-    //TODO: [AI 적용] 탐색 범위 3km. 해당 범위 벗어나는 공실 제외하도록 구현 필요
-    //TODO: 여기에서 AI를 사용해야 할 것 같다
-
     // request에 해당하는 공실을 repository에서 찾는다.
+    //TODO: 여기에서 AI를 사용해야 할 것 같다
     public List<RoomInfoDto> getRooms(AddressRequest request){
         double radiusInKm = 3.0;
         List<Address> nearbyAddresses = addressRepository.findByLocationWithinRadius(request.getLatitude(), request.getLongitude(), radiusInKm);
@@ -56,35 +54,33 @@ public class Service {
             totalLatitude += eachAddressDto.getLatitude();
             totalLongitude += eachAddressDto.getLongitude();
         }
+
         return CoordinateAddressDto.from(totalLatitude / number, totalLongitude / number);
     }
 
     // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
-    //TODO: 여기에서 AI를 사용해야 할 것 같다
-    //TODO: 금액 최댓값, 최솟값 사용자가 입력하면 해당 금액 범위 안 공실 탐색하도록 구현 필요
     //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
     public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
+        //TODO: 여기에서 AI를 사용해야 할 것 같다
         String prompt = request.getPrompt();
-        //TODO: request 안에 maxPrice, minPrice 있으니 사용 필요
+        CoordinateAddressDto midpoint = calculateMidpoint(AddressesForMiddleRequest.from(request.getAddressList()));
 
-        List<Address> addresses = request.getAddresses();
-        List<RoomInfoDto> recommendRooms = new ArrayList<>();
-        for (Address eachAddress : addresses) {
-            Room room = roomRepository.findByAddressAndPriceBetween(eachAddress, request.getMinPrice(), request.getMaxPrice());
-            recommendRooms.add(RoomInfoDto.from(room));
-        }
-        return recommendRooms;
+        List<Room> recommendedRooms = roomRepository.findWithinRadiusAndPriceRange(midpoint.getLatitude(),midpoint.getLongitude(), 3.0, request.getMinPrice(), request.getMaxPrice());
+        return recommendedRooms.stream().map(RoomInfoDto::from).toList();
     }
+    //TODO: 정상 작동은 하는데 빈 리스트를 리턴한다.. 왜 그러지?
 
     // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다.
     public RoomInfoDto getTheRoomInfoById(Long roomId){
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
+
         return RoomInfoDto.from(room);
     }
 
     // 예약 페이지의 정보들을 불러온다.
     public RoomReservationInfoDto getTheRoomReservationInfoById(Long roomId){
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
+
         return RoomReservationInfoDto.from(room);
     }
 

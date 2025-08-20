@@ -33,4 +33,11 @@ public class CoordinateAddressDto {
                 .longitude(address.getLongitude())
                 .build();
     }
+
+    public static CoordinateAddressDto from(AddressDto addressDto){
+        return CoordinateAddressDto.builder()
+                .latitude(addressDto.getLatitude())
+                .longitude(addressDto.getLongitude())
+                .build();
+    }
 }
