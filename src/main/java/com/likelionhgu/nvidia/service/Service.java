@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -35,12 +36,10 @@ public class Service {
 
     // request에 해당하는 공실을 repository에서 찾는다.
     public List<RoomInfoDto> getRooms(AddressRequest request){
-        List<RoomInfoDto> recommendRooms = new ArrayList<>();
-        Address targetAddress = addressRepository.findByLatitudeAndLongitude(request.getLatitude(), request.getLongitude());
-        Room room = roomRepository.findByAddress(targetAddress);
-        recommendRooms.add(RoomInfoDto.from(room));
+        double radiusInKm = 3.0;
+        List<Address> nearbyAddresses = addressRepository.findByLocationWithinRadius(request.getLatitude(), request.getLongitude(), radiusInKm);
 
-        return recommendRooms;
+        return nearbyAddresses.stream().map(Address::getRoom).map(RoomInfoDto::from).toList();
     }
 
     // 받은 주소 리스트들의 중간 주소를 계산한다.
