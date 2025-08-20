@@ -18,7 +18,7 @@ import java.util.TreeSet;
 public class ReservationDto {
     private Long roomId;
     private List<String> photo;
-    private Address address;
+    private AddressDto address;
     private String phoneNumber;
     private String account;
     private int maxPeople;
@@ -32,7 +32,7 @@ public class ReservationDto {
         return ReservationDto.builder()
                 .roomId(reservation.getRoom().getId())
                 .photo(reservation.getRoom().getPhotoList())
-                .address(reservation.getRoom().getAddress())
+                .address(AddressDto.from(reservation.getRoom().getAddress()))
                 .phoneNumber(reservation.getRePhoneNumber())
                 .account(reservation.getRoom().getAccount())
                 .maxPeople(reservation.getRoom().getMaxPeople())

@@ -3,6 +3,7 @@ package com.likelionhgu.nvidia.controller.response;
 import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Reservation;
 import com.likelionhgu.nvidia.domain.Schedule;
+import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.ReservationDto;
 import lombok.*;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 public class ReservationListResponse {
     private Long roomId;
     private List<String> photo;
-    private Address address;
+    private AddressDto address;
     private String phoneNumber;
     private String account;
     private int maxPeople;

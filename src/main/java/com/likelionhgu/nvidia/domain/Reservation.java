@@ -34,7 +34,7 @@ public class Reservation {
                 .reName(reservationRequest.getReName())
                 .reName(reservationRequest.getReName())
                 .rePhoneNumber(reservationRequest.getRePhoneNumber())
-                .date(reservationRequest.getDate())
+                .date(LocalDate.parse(reservationRequest.getDate()))
                 .slotIndex(reservationRequest.getSelectedTimeSlotIndex())
                 .build();
     }
@@ -44,7 +44,7 @@ public class Reservation {
                 .reName(reservationRequest.getReName())
                 .reName(reservationRequest.getReName())
                 .rePhoneNumber(reservationRequest.getRePhoneNumber())
-                .date(reservationRequest.getDate())
+                .date(LocalDate.parse(reservationRequest.getDate()))
                 .slotIndex(reservationRequest.getSelectedTimeSlotIndex())
                 .room(room)
                 .build();

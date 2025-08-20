@@ -110,12 +110,15 @@ public class Service {
     // 현재는 한 날짜만 받는 걸로 되어 있음. 반복 전송이 아닌 여러 날짜를 한번에 보낸다면 수정 필요 (일단 프론트에게 API 명세서 댓글로 물어봄)
     public String saveReservation(Long roomId, List<ReservationRequest> requests){
         for (ReservationRequest eachRequest : requests){
-            Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, eachRequest.getDate());
+            Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, LocalDate.parse(eachRequest.getDate()));
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
             //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
+            System.out.println("1. " + schedule.getDate());
 
             if (room != null) {
                 Reservation reservation = Reservation.from(room, eachRequest);
+                System.out.println("3. " + reservation.getId());
+
                 reservationRepository.save(reservation);
                 schedule.setRePhoneNumber(eachRequest.getRePhoneNumber());
             }
@@ -165,36 +168,35 @@ public class Service {
     // 예약 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     public List<ReservationDto> accessToReservationRecords(PasswordRequest passwordRequest){
-        List<Reservation> reservations = reservationRepository
-                .findByRePhoneNumberOrderByDateAsc(passwordRequest.getPhoneNumber());
+        List<Reservation> reservations = reservationRepository.findByRePhoneNumberOrderByDateAsc(passwordRequest.getPhoneNumber());
+        List<ReservationDto> reservationDtos = reservations.stream().map(ReservationDto::from).toList();
+        Map<LocalDate, ReservationDto> reservationMap = new LinkedHashMap<>();
 
-        Map<LocalDate, ReservationDto> dtoMap = new LinkedHashMap<>();
+        for (ReservationDto eachReservationDto : reservationDtos) {
+            LocalDate selectedDate = eachReservationDto.getReservedDate();
 
-        for (Reservation reservation : reservations) {
-            LocalDate date = reservation.getDate();
-
-            dtoMap.computeIfAbsent(date, d -> ReservationDto.from(reservation))
-                    .getReservedTime()
-                    .addAll(reservation.getSlotIndex());
+            if (reservationMap.containsKey(selectedDate)) {
+                reservationMap.get(selectedDate).getReservedTime().addAll(eachReservationDto.getReservedTime());
+            }else{
+                reservationMap.put(selectedDate, eachReservationDto);
+            }
         }
 
-        return new ArrayList<>(dtoMap.values());
+        return new ArrayList<>(reservationMap.values());
     }
 
     // 등록 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
+    //TODO: OrderedBy 필요 없는지 확인 필요
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
         List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
-//        List<Room> rooms = roomRepository.findByEnPhoneNumber(passwordRequest.getPhoneNumber());
-        System.out.println(rooms.size());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         for (Room eachRoom : rooms) {
             for (Schedule eachSchedule : eachRoom.getSchedules()) {
                 enrollmentDtos.add(EnrollmentDto.from(eachRoom, eachSchedule));
             }
         }
-        System.out.println(enrollmentDtos.size());
 
         return enrollmentDtos;
     }
