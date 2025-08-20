@@ -1,14 +1,10 @@
 package com.likelionhgu.nvidia.controller.response;
 
-import com.likelionhgu.nvidia.domain.Address;
-import com.likelionhgu.nvidia.domain.Reservation;
-import com.likelionhgu.nvidia.domain.Schedule;
 import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.ReservationDto;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 

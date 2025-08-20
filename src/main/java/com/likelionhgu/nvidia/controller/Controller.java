@@ -22,7 +22,7 @@ public class Controller {
     // response, request -> 먼저
     // 컨트롤러 -> 서비스 -> 데이터베이스 접근 필요 시 의존성 주입 -> 레포지토지
 
-    // 1.첫 화면 로딩 시 자주 찾는 장소 표시 (현재 위치 기준 근처 장소 탐색???)
+    // 1.첫 화면 로딩 시 자주 찾는 장소 표시 (현재 위치 기준 근처 장소 탐색)
     @GetMapping("/main")
     public ResponseEntity<List<RoomInfoDto>> setInitialCard(@RequestBody AddressRequest address){
         List<RoomInfoDto> recommendsDto = service.getRooms(address);
@@ -36,19 +36,20 @@ public class Controller {
         return ResponseEntity.ok().body(MiddleAddressResponse.from(coordinateAddressDto));
     }
 
-    // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천 (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
+    // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천
+    //TODO: (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
     //TODO: 가격 낮은 순으로 필터링해서 보내기
     @GetMapping("/recommend")
-    public ResponseEntity<List<RoomInfoDto>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
-        List<RoomInfoDto> recommendsDto = service.getRoomsWithPrompt(AddressAndPrompt);
-        return ResponseEntity.ok().body(recommendsDto);
+    public ResponseEntity<List<RoomInfoResponse>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
+        List<RoomInfoDto> recommendsDtos = service.getRoomsWithPrompt(AddressAndPrompt);
+        return ResponseEntity.ok().body(recommendsDtos.stream().map(RoomInfoResponse::from).toList());
     }
 
     // 4.추천 카드 눌렀을 때 해당 상세 모달 띄움
     @GetMapping("/recommend/detail/{roomId}")
-    public ResponseEntity<RoomInfoDto> enterDetailPage(@PathVariable Long roomId){
+    public ResponseEntity<RoomInfoResponse> enterDetailPage(@PathVariable Long roomId){
         RoomInfoDto roomInfoDto = service.getTheRoomInfoById(roomId);
-        return ResponseEntity.ok().body(roomInfoDto);
+        return ResponseEntity.ok().body(RoomInfoResponse.from(roomInfoDto));
     }
 
     // 5.예약하러 가기 버튼 클릭 시 예약 페이지 이동
@@ -82,7 +83,6 @@ public class Controller {
     // 7.등록 페이지에서 등록 버튼을 눌러 등록
     //TODO: 시간 전체 선택 로직 구현 필요 (전체 선택 후 일부 제거 경우도 고려 필요)
     @PostMapping("/enrollment/done")
-//    public ResponseEntity<String> doEnrollment(@RequestBody EnrollmentRequest request, @RequestParam("imageFile") MultipartFile file){
     public ResponseEntity<String> doEnrollment(@RequestPart("request") EnrollmentRequest request, @RequestPart("imageFile") MultipartFile file){
         String message = service.saveEnrollment(request, file);
         return ResponseEntity.ok().body(message);
