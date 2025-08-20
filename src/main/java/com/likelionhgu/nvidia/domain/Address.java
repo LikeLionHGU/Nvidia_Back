@@ -1,13 +1,15 @@
 package com.likelionhgu.nvidia.domain;
 
+import com.likelionhgu.nvidia.controller.request.AddressRequest;
+import com.likelionhgu.nvidia.dto.AddressDto;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter @Setter
-@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Builder
 @Table(name = "address")
 public class Address {
 
@@ -18,6 +20,24 @@ public class Address {
     private double longitude;
     private String roadName;
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "address")
     private Room room;
+
+    public static Address from(AddressRequest addressRequest){
+        return Address.builder()
+                .latitude(addressRequest.getLatitude())
+                .longitude(addressRequest.getLongitude())
+                .roadName(null)
+                .build();
+    }
+
+    public static Address from(AddressDto addressDto){
+        return Address.builder()
+                .latitude(addressDto.getLatitude())
+                .longitude(addressDto.getLongitude())
+                .roadName(addressDto.getRoadName())
+                .build();
+    }
+
+    //TODO: AddressAndPromptAndPricesRequest 안의 Address 해결하기
 }
