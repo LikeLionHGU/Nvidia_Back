@@ -30,6 +30,7 @@ public class Service {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final ScheduleRepository scheduleRepository;
+    private final FunctionService functionService;
 
     // request에 해당하는 공실을 repository에서 찾는다.
     //TODO: 여기에서 AI를 사용해야 할 것 같다
@@ -65,8 +66,13 @@ public class Service {
         String prompt = request.getPrompt();
         CoordinateAddressDto midpoint = calculateMidpoint(AddressesForMiddleRequest.from(request.getAddressList()));
 
+        // 거리기준(3km) 필터링
         List<Room> recommendedRooms = roomRepository.findWithinRadiusAndPriceRange(midpoint.getLatitude(),midpoint.getLongitude(), 3.0, request.getMinPrice(), request.getMaxPrice());
-        return recommendedRooms.stream().map(RoomInfoDto::from).toList();
+        // 가격 기준 필터링
+        List<Room> recommendedRoomsByPrice = functionService.findRoomByBudgetRange(recommendedRooms, request.getMinPrice(), request.getMinPrice());
+        // 프롬프트 기준 필터링
+        List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRoomsByPrice, prompt);
+        return recommendedRoomByPrompt.stream().map(RoomInfoDto::from).toList();
     }
     //TODO: 정상 작동은 하는데 빈 리스트를 리턴한다.. 왜 그러지?
 
