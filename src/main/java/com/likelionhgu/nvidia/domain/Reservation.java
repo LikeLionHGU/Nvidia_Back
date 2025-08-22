@@ -17,9 +17,8 @@ import java.util.TreeSet;
 public class Reservation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String reName;
-    private String rePhoneNumber;
-    //TODO: API 명세서에는 String으로 되어 있지만 통일성을 위해 LocalDate로 바꿈 (API 명세서도 바꾸기)
+    private String name;
+    private String phoneNumber;
     private LocalDate date;
     @ElementCollection(fetch = FetchType.LAZY)
     private Set<Integer> slotIndex = new TreeSet<>();
@@ -30,21 +29,19 @@ public class Reservation {
 
     public static Reservation from(ReservationRequest reservationRequest){
         return Reservation.builder()
-                .reName(reservationRequest.getReName())
-                .reName(reservationRequest.getReName())
-                .rePhoneNumber(reservationRequest.getRePhoneNumber())
+                .name(reservationRequest.getName())
+                .phoneNumber(reservationRequest.getPhoneNumber())
                 .date(LocalDate.parse(reservationRequest.getDate()))
-                .slotIndex(reservationRequest.getSelectedTimeSlotIndex())
+                .slotIndex(reservationRequest.getSchedule())
                 .build();
     }
 
     public static Reservation from(Room room, ReservationRequest reservationRequest){
         return Reservation.builder()
-                .reName(reservationRequest.getReName())
-                .reName(reservationRequest.getReName())
-                .rePhoneNumber(reservationRequest.getRePhoneNumber())
+                .name(reservationRequest.getName())
+                .phoneNumber(reservationRequest.getPhoneNumber())
                 .date(LocalDate.parse(reservationRequest.getDate()))
-                .slotIndex(reservationRequest.getSelectedTimeSlotIndex())
+                .slotIndex(reservationRequest.getSchedule())
                 .room(room)
                 .build();
     }

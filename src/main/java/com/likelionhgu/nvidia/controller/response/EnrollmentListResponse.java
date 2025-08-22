@@ -1,13 +1,10 @@
 package com.likelionhgu.nvidia.controller.response;
 
-import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.EnrollmentDto;
-import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -17,8 +14,10 @@ import java.util.TreeSet;
 @RequiredArgsConstructor
 @Builder
 public class EnrollmentListResponse {
-    private String enPhoneNumber;
+    private Long roomId;
+    private String photo;
     private AddressDto address;
+    private String phoneNumber;
     private String account;
     private int maxPeople;
     private int price;
@@ -27,8 +26,10 @@ public class EnrollmentListResponse {
 
     public static EnrollmentListResponse from(EnrollmentDto enrollmentDto) {
         return EnrollmentListResponse.builder()
-                .enPhoneNumber(enrollmentDto.getPhoneNumber())
+                .roomId(enrollmentDto.getRoomId())
+                .photo(enrollmentDto.getPhoto())
                 .address(enrollmentDto.getAddress())
+                .phoneNumber(enrollmentDto.getPhoneNumber())
                 .account(enrollmentDto.getAccount())
                 .maxPeople(enrollmentDto.getMaxPeople())
                 .price(enrollmentDto.getPrice())

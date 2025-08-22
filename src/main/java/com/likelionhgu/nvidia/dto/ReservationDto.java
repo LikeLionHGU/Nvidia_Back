@@ -31,7 +31,7 @@ public class ReservationDto {
                 .roomId(reservation.getRoom().getId())
                 .photo(reservation.getRoom().getPhotoList())
                 .address(AddressDto.from(reservation.getRoom().getAddress()))
-                .phoneNumber(reservation.getRePhoneNumber())
+                .phoneNumber(reservation.getPhoneNumber())
                 .account(reservation.getRoom().getAccount())
                 .maxPeople(reservation.getRoom().getMaxPeople())
                 .selectedHour(reservation.getSlotIndex().size())

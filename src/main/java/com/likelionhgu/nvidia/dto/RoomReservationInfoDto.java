@@ -18,31 +18,29 @@ import java.util.stream.Collectors;
 public class RoomReservationInfoDto {
     // RoomInfoDto 필드와 동일
     private Long roomId;
-    private List<String> photo;
+    private List<String> photoList;
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
-    private int price;
     private String memo;
     private List<String> chipList;
     private List<String> optionList;
+    private int price;
     // // RoomInfoDto에서 추가됨
     private String account;
-    private List<ScheduleDto> timeTable;
 
     public static RoomReservationInfoDto from(Room room){
         return RoomReservationInfoDto.builder()
                 .roomId(room.getId())
-                .photo(room.getPhotoList())
+                .photoList(room.getPhotoList())
                 .address(AddressDto.from(room.getAddress()))
                 .maxPeople(room.getMaxPeople())
                 .phoneNumber(room.getEnPhoneNumber())
-                .price(room.getPrice())
                 .memo(room.getMemo())
                 .chipList(room.getChipList())
                 .optionList(room.getOptionList())
+                .price(room.getPrice())
                 .account(room.getAccount())
-                .timeTable(room.getSchedules().stream().map(ScheduleDto::from).collect(Collectors.toList()))
                 .build();
     }
 }
