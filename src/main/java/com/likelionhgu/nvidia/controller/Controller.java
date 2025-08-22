@@ -37,8 +37,6 @@ public class Controller {
     }
 
     // 3.주소 및 프롬프트 내용으로 검색 시 관련 장소 추천
-    //TODO: (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
-    //TODO: 가격 낮은 순으로 필터링해서 보내기
     @PostMapping("/recommend")
     public ResponseEntity<List<RoomBriefInfoResponse>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
         List<RoomBriefInfoDto> recommendsDtos = service.getRoomsWithPrompt(AddressAndPrompt);
@@ -81,7 +79,6 @@ public class Controller {
     }
 
     // 7.등록 페이지에서 등록 버튼을 눌러 등록
-    //TODO: 시간 전체 선택 로직 구현 필요 (전체 선택 후 일부 제거 경우도 고려 필요)
     @PostMapping(value = "/enrollment/done")
     public ResponseEntity<String> doEnrollment(
             @RequestPart("request") EnrollmentRequest request,

@@ -39,5 +39,4 @@ public class Address {
                 .build();
     }
 
-    //TODO: AddressAndPromptAndPricesRequest 안의 Address 해결하기
 }

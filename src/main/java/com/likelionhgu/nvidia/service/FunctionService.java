@@ -89,7 +89,7 @@ public class FunctionService {
     public List<Room> findRoomByBudgetRange(List<Room> roomList, int minPrice, int maxPrice){
         List<Room> filtered = new ArrayList<>();
         for(Room room : roomList){
-            if(room.getPrice() <= maxPrice && room.getPrice() <= minPrice){
+            if(room.getPrice() <= maxPrice && room.getPrice() >= minPrice){
                 filtered.add(room);
             }
         }
@@ -99,7 +99,15 @@ public class FunctionService {
 
     public List<Room> findRoomByChips(List<Room> roomList, String prompt) {
         List<Chip> chips = chipExtractorService.extractChips(prompt).getChips();
+        System.out.println("\n------Chips------");
+        for(Chip chip : chips){
+            System.out.println(chip + ",");
+        }
+        System.out.println("\n");
 
+        if(chips.isEmpty()){
+            return roomList;
+        }
         List<Room> filtered = new ArrayList<>();
         for (Room room : roomList) {
             if (room == null || room.getChipList() == null) continue;
