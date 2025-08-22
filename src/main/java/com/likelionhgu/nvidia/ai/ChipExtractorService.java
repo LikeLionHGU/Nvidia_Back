@@ -84,11 +84,11 @@ public class ChipExtractorService {
             String reason = node.has("reason") && node.get("reason").isTextual() ? node.get("reason").asText() : null;
 
             List<Chip> filtered = new ArrayList<>();
-            if (chipsNode != null && chipsNode.isArray()) {
-                for (JsonNode c : chipsNode) {
-                    normalizeToEnum(c.asText()).ifPresent(filtered::add);
-                }
-            }
+//            if (chipsNode != null && chipsNode.isArray()) {
+//                for (JsonNode c : chipsNode) {
+//                    normalizeToEnum(c.asText()).ifPresent(filtered::add);
+//                }
+//            }
             return new ChipsResponse(List.copyOf(filtered), reason, null);
         } catch (Exception e) {
             return new ChipsResponse(List.of(), "BAD_JSON", "parse");
@@ -150,29 +150,10 @@ public class ChipExtractorService {
         return (o instanceof Map<?, ?> m) ? (Map<String, Object>) m : Map.of();
     }
 
-    private static Optional<Chip> normalizeToEnum(String s) {
-        if (s == null) return Optional.empty();
+    private static String normalizeToEnum(String s) {
+        if (s == null) return null;
         String n = s.trim().replace('-', ' ').replace('_', ' ').replaceAll("\\s+", " ");
         // 특수 매핑
-        return switch (n) {
-            case "협업 친화적" -> Optional.of(Chip.협업_친화적);
-            case "집중하기 좋은" -> Optional.of(Chip.집중하기_좋은);
-            case "가족 친화적" -> Optional.of(Chip.가족_친화적);
-            case "교통 편리한" -> Optional.of(Chip.교통_편리한);
-            case "주차 편리한" -> Optional.of(Chip.주차_편리한);
-            case "접근성 좋은" -> Optional.of(Chip.접근성_좋은);
-            case "채광 좋은" -> Optional.of(Chip.채광_좋은);
-            case "환기 잘되는" -> Optional.of(Chip.환기_잘되는);
-            case "방음 좋은" -> Optional.of(Chip.방음_좋은);
-            case "장비 완비" -> Optional.of(Chip.장비_완비);
-            case "인스타 감성" -> Optional.of(Chip.인스타_감성);
-            default -> {
-                try {
-                    yield Optional.of(Chip.valueOf(n.replace(' ', '_')));
-                } catch (IllegalArgumentException ex) {
-                    yield Optional.empty();
-                }
-            }
-        };
+        return (n.equals("영감을 주는") ? "영감을_주는" : s);
     }
 }
