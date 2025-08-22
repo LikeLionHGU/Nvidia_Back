@@ -133,22 +133,22 @@ public class Service {
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
     //TODO: 한 날짜 시간 슬롯 전체 선택 기능도 구현 필요 -> 프론트에서 자체 처리?
     public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
+        List<String> uploadUrlList = null;
+
         String uploadUrl = null;
-        Map<String, String> roomPhotoMap = new HashMap<>();
+        for(MultipartFile file : files) {
+            try {
+                uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+            } catch (IOException e) {
+                System.out.println("error : 이미지 업로드에 실패했습니다: " + e.getMessage());
+            }
+            uploadUrlList.add(uploadUrl);
+        }
 
-//        try {
-//            uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
-//            roomPhotoMap= Map.of("uploadUrl",uploadUrl);
-//        } catch (IOException e) {
-//            roomPhotoMap = Map.of("error","이미지 업로드에 실패했습니다: " + e.getMessage());
-//        }
-
-        // TODO: S3Service를 바로 호출하면 됨. S3컨트롤러 필요 없음 (S3ControllerTest.java 삭제할지 결정 필요)
-        List<String> fileUrl = new ArrayList<>(roomPhotoMap.values());
 
         //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
         addressRepository.save(request.getAddress());
-        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
+        Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
 
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
             Schedule eachSchedule = scheduleRepository.findByEnPhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
