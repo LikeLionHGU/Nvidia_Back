@@ -59,7 +59,6 @@ public class Service {
     }
 
     // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
-    //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
     public List<RoomBriefInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
         String prompt = request.getPrompt();
         CoordinateAddressDto midpoint = calculateMidpoint(AddressesForMiddleRequest.from(request.getAddressList()));
@@ -70,7 +69,10 @@ public class Service {
         // 프롬프트 기준 필터링
         List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRooms, prompt);
         System.out.println("Prompt filtering : " + recommendedRoomByPrompt.size());
-        return recommendedRoomByPrompt.stream().map(RoomBriefInfoDto::from).toList();
+        // 거리기준 sorting
+        List<Room> result = functionService.sortByDistance(recommendedRoomByPrompt, midpoint);
+
+        return result.stream().map(RoomBriefInfoDto::from).toList();
     }
 
     // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다.
@@ -141,7 +143,6 @@ public class Service {
         }
 
 
-        //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
         addressRepository.save(request.getAddress());
         Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
 
@@ -187,7 +188,7 @@ public class Service {
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     //TODO: OrderedBy 필요 없는지 확인 필요
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
-        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
+        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedulesOrderByDateAsc(passwordRequest.getPhoneNumber());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         for (Room eachRoom : rooms) {
             for (Schedule eachSchedule : eachRoom.getSchedules()) {
