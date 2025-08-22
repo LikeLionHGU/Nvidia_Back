@@ -143,7 +143,8 @@ public class Service {
         }
 
 
-        addressRepository.save(request.getAddress());
+
+        addressRepository.save(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()));
         Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
 
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){

@@ -39,4 +39,11 @@ public class Address {
                 .build();
     }
 
+    public static Address from(double latitude, double longitude, String roadName){
+        return Address.builder()
+                .latitude(latitude)
+                .longitude(longitude)
+                .roadName(roadName)
+                .build();
+    }
 }

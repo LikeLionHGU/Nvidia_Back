@@ -11,7 +11,11 @@ import java.util.List;
 public class EnrollmentRequest {
     private String enName;
     private String enPhoneNumber;
-    private Address address;
+
+    private String roadName;
+    private double latitude;
+    private double longitude;
+
     private String account;
     private int maxPeople;
     private int price;
