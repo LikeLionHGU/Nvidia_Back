@@ -1,219 +1,682 @@
--- =========================
--- Address
--- =========================
-insert into address (id, latitude, longitude, road_name) values
-                                                             (1, 37.5665, 126.9780, '서울특별시 중구 세종대로 110'),
-                                                             (2, 35.1796, 129.0756, '부산광역시 중구 중앙대로 100'),
-                                                             (3, 36.3504, 127.3845, '대전광역시 서구 둔산대로 100'),
-                                                             (4, 37.4563, 126.7052, '인천광역시 남동구 인주대로 100'),
-                                                             (5, 35.8714, 128.6014, '대구광역시 중구 공평로 100');
-
--- =========================
--- Room
--- =========================
-insert into room (id, en_name, en_phone_number, address_id, account, max_people, price, memo)
-values
-    (100, '세종스터디룸', '010-1111-2222', 1, '신한 110-123-456789', 6, 15000, '종로 중심, 조용한 분위기'),
-    (101, '해운대미팅룸', '010-2222-3333', 2, '국민 333-222-111111', 10, 25000, '바다 근처, 채광 좋음'),
-    (102, '둔산협업룸', '010-3333-4444', 3, '우리 1002-555-666666', 8, 20000, '협업 친화적 레이아웃'),
-    (103, '인주프라이빗룸', '010-4444-5555', 4, '농협 302-7777-888888', 4, 12000, '프라이빗, 방음 좋음'),
-    (104, '공평크리에이티브', '010-5555-6666', 5, '카카오 3333-99-000000', 12, 30000, '창의적인 무드, 장비 완비');
-
--- =========================
--- Room.chipList (Element Collection)
--- (Room 엔티티의 chipList가 enum 이름 그대로 저장된다고 하셨으므로 enum name 그대로 입력)
--- =========================
--- insert into room_chip_list (room_id, chip_list) values
---                                                     (100, '조용한'),
---                                                     (100, '집중하기_좋은'),
---                                                     (101, '채광_좋은'),
---                                                     (101, '개방적인'),
---                                                     (102, '협업_친화적'),
---                                                     (102, '모던한'),
---                                                     (103, '프라이빗한'),
---                                                     (103, '방음_좋은'),
---                                                     (104, '창의적인'),
---                                                     (104, '장비_완비'),
---                                                     (104, '트렌디한');
-
--- =========================
--- Room.optionList (Element Collection)
--- =========================
--- insert into room_option_list (room_id, option_list) values
---                                                         (100, '화이트보드'),
---                                                         (100, 'WIFI'),
---                                                         (101, '프로젝터'),
---                                                         (101, 'WIFI'),
---                                                         (102, 'TV'),
---                                                         (102, 'HDMI'),
---                                                         (103, '개인콘센트'),
---                                                         (103, '방음도어'),
---                                                         (104, '프로젝터'),
---                                                         (104, '마이크'),
---                                                         (104, '스피커');
-
--- =========================
--- Room.photoList (Element Collection)
--- 실제 운영에서는 S3 등의 실제 URL을 넣어주세요
--- =========================
--- insert into room_photo_list (room_id, photo_list) values
---                                                       (100, 'https://example.com/photo/sejong-1.jpg'),
---                                                       (100, 'https://example.com/photo/sejong-2.jpg'),
---                                                       (101, 'https://example.com/photo/haeundae-1.jpg'),
---                                                       (102, 'https://example.com/photo/dunsan-1.jpg'),
---                                                       (103, 'https://example.com/photo/inju-1.jpg'),
---                                                       (104, 'https://example.com/photo/gongpyeong-1.jpg'),
---                                                       (104, 'https://example.com/photo/gongpyeong-2.jpg');
-
--- =========================
--- Schedule (영업자가 등록한 예약가능 슬롯)
--- 날짜/슬롯 인덱스는 예시입니다.
--- =========================
-insert into schedule (id, date, en_phone_number, re_phone_number, room_id)
-values
-    (200, DATE '2025-08-20', '010-1111-2222', null, 100),
-    (201, DATE '2025-08-20', '010-2222-3333', null, 101),
-    (202, DATE '2025-08-21', '010-3333-4444', null, 102),
-    (203, DATE '2025-08-21', '010-4444-5555', null, 103),
-    (204, DATE '2025-08-22', '010-5555-6666', null, 104);
-
--- Schedule.slotIndex (Element Collection: 가능 슬롯 인덱스)
-insert into schedule_slot_index (schedule_id, slot_index) values
-                                                              (200, 9),  (200, 10), (200, 11),
-                                                              (201, 13), (201, 14),
-                                                              (202, 10), (202, 11), (202, 12),
-                                                              (203, 15),
-                                                              (204, 9),  (204, 10), (204, 11), (204, 12);
-
--- =========================
--- Reservation (사용자 예약)
--- =========================
-insert into reservation (id, re_name, re_phone_number, date, room_id)
-values
-    (300, '김하나', '010-9000-1111', DATE '2025-08-20', 100),
-    (301, '박둘',   '010-9000-2222', DATE '2025-08-21', 102),
-    (302, '이셋',   '010-9000-3333', DATE '2025-08-22', 104);
-
--- Reservation.slotIndex (Element Collection: 예약된 슬롯 인덱스 세트)
-insert into reservation_slot_index (reservation_id, slot_index) values
-                                                                    (300, 10),
-                                                                    (301, 11),
-                                                                    (302, 9), (302, 10);
-
--- =========================
--- 양방향 연관 관계 상 Address.room (mappedBy)이므로 별도 업데이트 없이
--- Room의 address_id FK만 정확하면 됩니다.
--- =========================
-
-CREATE TABLE address
-(
-    id        BIGINT AUTO_INCREMENT NOT NULL,
-    latitude  DOUBLE                NOT NULL,
-    longitude DOUBLE                NOT NULL,
-    road_name VARCHAR(255)          NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
-);
-
-CREATE TABLE reservation
-(
-    id              BIGINT AUTO_INCREMENT NOT NULL,
-    re_name         VARCHAR(255)          NULL,
-    re_phone_number VARCHAR(255)          NULL,
-    selected_time   INT                   NOT NULL,
-    room_id         BIGINT                NOT NULL,
-    slot_index      BLOB                  NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
-);
-
-CREATE TABLE room
-(
-    id              BIGINT AUTO_INCREMENT NOT NULL,
-    account         VARCHAR(255)          NULL,
-    en_name         VARCHAR(255)          NULL,
-    en_phone_number VARCHAR(255)          NULL,
-    max_people      INT                   NOT NULL,
-    memo            VARCHAR(2000)         NULL,
-    price           INT                   NOT NULL,
-    address_id      BIGINT                NOT NULL,
-    chip_list       BLOB                  NULL,
-    option_list     BLOB                  NULL,
-    photo_list      BLOB                  NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
-);
-
-CREATE TABLE schedule
-(
-    date            date                  NULL,
-    id              BIGINT AUTO_INCREMENT NOT NULL,
-    room_id         BIGINT                NULL,
-    en_phone_number VARCHAR(255)          NULL,
-    re_phone_number VARCHAR(255)          NULL,
-    slot_index      BLOB                  NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
-);
-
-ALTER TABLE room
-    ADD CONSTRAINT UKmsj6pl25a9mfurteu4nsg4t1u UNIQUE (address_id);
-
-ALTER TABLE room
-    ADD CONSTRAINT FK98b6qeo4s2wbfach8x3g84a3d FOREIGN KEY (address_id) REFERENCES address (id) ON DELETE NO ACTION;
-
-ALTER TABLE schedule
-    ADD CONSTRAINT FKh2hdhbss2x31ns719hka6enma FOREIGN KEY (room_id) REFERENCES room (id) ON DELETE NO ACTION;
-
-CREATE INDEX FKh2hdhbss2x31ns719hka6enma ON schedule (room_id);
-
-ALTER TABLE reservation
-    ADD CONSTRAINT FKm8xumi0g23038cw32oiva2ymw FOREIGN KEY (room_id) REFERENCES room (id) ON DELETE NO ACTION;
-
-CREATE INDEX FKm8xumi0g23038cw32oiva2ymw ON reservation (room_id);
+-- Address 테이블 더미 데이터 (40개)
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (1, '서울특별시 강남구 테헤란로 123', 37.502, 127.026);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (2, '부산광역시 해운대구 마린시티2로 33', 35.158, 129.155);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (3, '제주특별자치도 제주시 첨단로 242', 33.454, 126.565);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (4, '경기도 성남시 분당구 판교역로 235', 37.394, 127.111);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (5, '대구광역시 수성구 동대구로 11', 35.864, 128.628);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (6, '광주광역시 서구 상무중앙로 43', 35.152, 126.858);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (7, '대전광역시 유성구 문지로 193', 36.376, 127.387);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (8, '울산광역시 남구 삼산로 30', 35.534, 129.313);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (9, '세종특별자치시 도움6로 11', 36.483, 127.288);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (10, '인천광역시 중구 영종해안북로 415', 37.458, 126.549);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (11, '서울특별시 마포구 월드컵북로 412', 37.578, 126.890);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (12, '부산광역시 금정구 중앙대로 1971', 35.234, 129.080);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (13, '제주특별자치도 서귀포시 중정로 33', 33.251, 126.566);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (14, '경기도 수원시 영통구 광교중앙로 222', 37.291, 127.050);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (15, '대구광역시 중구 동성로3길 94', 35.871, 128.591);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (16, '광주광역시 동구 금남로 245', 35.148, 126.915);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (17, '대전광역시 서구 둔산로 100', 36.353, 127.386);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (18, '울산광역시 중구 학성로 225', 35.556, 129.330);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (19, '세종특별자치시 절재로 206', 36.488, 127.287);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (20, '인천광역시 서구 청라대로 144', 37.533, 126.657);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (21, '서울특별시 종로구 인사동길 15', 37.574, 126.985);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (22, '부산광역시 남구 용소로 45', 35.138, 129.102);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (23, '제주특별자치도 제주시 중앙로 156', 33.510, 126.529);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (24, '경기도 고양시 일산동구 호수로 595', 37.659, 126.772);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (25, '대구광역시 북구 엑스코로 10', 35.897, 128.601);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (26, '광주광역시 북구 용봉로 77', 35.176, 126.906);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (27, '대전광역시 동구 용전동 1-3', 36.349, 127.426);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (28, '울산광역시 동구 방어진순환도로 663', 35.518, 129.418);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (29, '세종특별자치시 갈매로 387', 36.484, 127.260);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (30, '인천광역시 강화군 강화읍 강화대로 340', 37.747, 126.487);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (31, '서울특별시 영등포구 여의동로 330', 37.525, 126.924);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (32, '부산광역시 해운대구 동백로 52', 35.166, 129.141);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (33, '제주특별자치도 서귀포시 성산읍 일출로 284-12', 33.468, 126.940);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (34, '경기도 안양시 동안구 관평로170번길 33', 37.387, 126.953);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (35, '대구광역시 달성군 화원읍 화암로 26', 35.787, 128.529);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (36, '광주광역시 광산구 첨단중앙로 182번길 42', 35.228, 126.837);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (37, '대전광역시 유성구 과학로 87', 36.381, 127.362);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (38, '울산광역시 북구 무룡로 379', 35.584, 129.362);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (39, '세종특별자치시 조치원읍 충현로 100', 36.602, 127.291);
+INSERT INTO address (id, road_name, latitude, longitude) VALUES (40, '인천광역시 연수구 송도과학로 32', 37.385, 126.635);
 
 
--- =========================
--- Address
--- (변화 없음: 단일 값 저장)
--- =========================
-insert into address (id, latitude, longitude, road_name) values (1, 37.5665, 126.9780, '서울특별시 중구 세종대로 110');
-insert into address (id, latitude, longitude, road_name) values (2, 35.1796, 129.0756, '부산광역시 중구 중앙대로 100');
-insert into address (id, latitude, longitude, road_name) values (3, 36.3504, 127.3845, '대전광역시 서구 둔산대로 100');
-insert into address (id, latitude, longitude, road_name) values (4, 37.4563, 126.7052, '인천광역시 남동구 인주대로 100');
-insert into address (id, latitude, longitude, road_name) values (5, 35.8714, 128.6014, '대구광역시 중구 공평로 100');
+-- Room 테이블 더미 데이터 (40개)
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (1, '110-111-222222', '스튜디오 그린', '010-1234-5678', 4, '채광이 좋은 아늑한 스튜디오', 50000, 1);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (2, '110-333-444444', '회의실 블루', '010-2345-6789', 10, '최신 시설을 갖춘 넓은 회의실', 80000, 2);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (3, '110-555-666666', '화이트 갤러리', '010-3456-7890', 5, '전시, 촬영에 최적화된 공간', 65000, 3);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (4, '110-777-888888', '판교 코워킹 스페이스', '010-4567-8901', 20, '스타트업을 위한 유연한 업무 공간', 150000, 4);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (5, '110-999-000000', '대구 스터디룸', '010-5678-9012', 6, '조용하고 집중이 잘 되는 스터디 공간', 30000, 5);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (6, '110-123-456789', '광주 세미나실', '010-6789-0123', 30, '단체 워크숍에 적합한 대형 세미나실', 200000, 6);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (7, '110-234-567890', '대전 파티룸', '010-7890-1234', 8, '친구들과 즐기기 좋은 파티 공간', 75000, 7);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (8, '110-345-678901', '울산 연습실', '010-8901-2345', 3, '악기 연습 및 개인 레슨용 연습실', 40000, 8);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (9, '110-456-789012', '세종 스몰 미팅룸', '010-9012-3456', 2, '소규모 회의에 최적화된 미팅룸', 25000, 9);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (10, '110-567-890123', '인천 오션뷰 라운지', '010-0123-4567', 15, '바다가 보이는 탁 트인 라운지', 120000, 10);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (11, '110-678-901234', '서울 가든 카페', '010-1122-3344', 6, '싱그러운 정원이 있는 카페형 공간', 55000, 11);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (12, '110-789-012345', '부산 댄스 스튜디오', '010-2233-4455', 12, '넓은 거울과 음향 시설을 갖춘 댄스 연습실', 90000, 12);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (13, '110-890-123456', '제주 야외 촬영 스팟', '010-3344-5566', 2, '감성적인 야외 촬영에 좋은 공간', 100000, 13);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (14, '110-901-234567', '수원 강의실', '010-4455-6677', 25, '프로젝트 강의에 최적화된 강의실', 180000, 14);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (15, '110-012-345678', '대구 공작소', '010-5566-7788', 8, 'DIY 및 공예 활동을 위한 작업 공간', 60000, 15);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (16, '110-123-456780', '광주 북카페', '010-6677-8899', 7, '책과 함께 휴식하는 조용한 공간', 45000, 16);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (17, '110-234-567891', '대전 코딩 스터디룸', '010-7788-9900', 4, '개발자들을 위한 스터디룸', 35000, 17);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (18, '110-345-678902', '울산 아틀리에', '010-8899-0011', 5, '예술 활동을 위한 개인 작업실', 70000, 18);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (19, '110-456-789013', '세종 방송실', '010-9900-1122', 3, '개인 방송 및 팟캐스트 녹음용 공간', 85000, 19);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (20, '110-567-890124', '인천 미디어룸', '010-0011-2233', 10, '영상 편집 및 미디어 제작 공간', 110000, 20);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (21, '110-678-901235', '서울 한옥 게스트하우스', '010-1122-3344', 4, '전통 한옥의 고즈넉한 분위기', 150000, 21);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (22, '110-789-012346', '부산 게스트하우스', '010-2233-4455', 8, '해운대 근처 깨끗한 숙박 공간', 180000, 22);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (23, '110-890-123457', '제주 게스트하우스', '010-3344-5566', 6, '아름다운 제주의 자연을 즐기는 숙박 공간', 170000, 23);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (24, '110-901-234568', '일산 게스트하우스', '010-4455-6677', 5, '호수공원 근처 편안한 숙박 공간', 130000, 24);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (25, '110-012-345679', '대구 게스트하우스', '010-5566-7788', 10, '엑스코 근처 편리한 숙박 공간', 160000, 25);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (26, '110-123-456781', '광주 게스트하우스', '010-6677-8899', 7, '광주 시내 중심가에 위치한 게스트하우스', 140000, 26);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (27, '110-234-567892', '대전 게스트하우스', '010-7788-9900', 4, '편안하고 아늑한 대전의 게스트하우스', 120000, 27);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (28, '110-345-678903', '울산 게스트하우스', '010-8899-0011', 5, '넓고 쾌적한 울산 게스트하우스', 135000, 28);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (29, '110-456-789014', '세종 게스트하우스', '010-9900-1122', 3, '세종 정부청사 근처 숙박 공간', 100000, 29);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (30, '110-567-890125', '강화도 게스트하우스', '010-0011-2233', 6, '강화도의 자연을 느낄 수 있는 숙박 공간', 160000, 30);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (31, '110-678-901236', '여의도 오피스텔', '010-1122-3344', 2, '금융가에 위치한 깔끔한 오피스텔', 200000, 31);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (32, '110-789-012347', '해운대 오션 뷰 호텔', '010-2233-4455', 4, '바다 전망이 멋진 호텔 스위트룸', 350000, 32);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (33, '110-890-123458', '성산일출봉 펜션', '010-3344-5566', 5, '아침 해를 볼 수 있는 아름다운 펜션', 250000, 33);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (34, '110-901-234569', '안양 레지던스', '010-4455-6677', 3, '편리한 주거형 숙박 시설', 180000, 34);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (35, '110-012-345670', '대구 풀빌라', '010-5566-7788', 8, '개인 수영장이 있는 럭셔리 풀빌라', 400000, 35);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (36, '110-123-456782', '광주 펜션', '010-6677-8899', 6, '단체 여행에 좋은 넓은 펜션', 220000, 36);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (37, '110-234-567893', '대전 호텔', '010-7788-9900', 2, '깔끔하고 서비스 좋은 비즈니스 호텔', 150000, 37);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (38, '110-345-678904', '울산 리조트', '010-8899-0011', 10, '가족 단위 여행에 적합한 리조트', 300000, 38);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (39, '110-456-789015', '조치원 펜션', '010-9900-1122', 7, '한적한 시골 분위기의 펜션', 175000, 39);
+INSERT INTO room (id, account, en_name, en_phone_number, max_people, memo, price, address_id) VALUES (40, '110-567-890126', '송도 호텔', '010-0011-2233', 4, '송도 야경이 멋진 호텔', 210000, 40);
 
--- =========================
--- Room
--- (chipList, optionList, photoList를 단일 컬럼에 통합)
--- =========================
-insert into room (id, en_name, en_phone_number, address_id, account, max_people, price, memo, chip_list, option_list, photo_list)
-values
-    (100, '세종스터디룸', '010-1111-2222', 1, '신한 110-123-456789', 6, 15000, '종로 중심, 조용한 분위기', '조용한,집중하기_좋은', '화이트보드,WIFI', 'https://example.com/photo/sejong-1.jpg,https://example.com/photo/sejong-2.jpg'),
-    (101, '해운대미팅룸', '010-2222-3333', 2, '국민 333-222-111111', 10, 25000, '바다 근처, 채광 좋음', '채광_좋은,개방적인', '프로젝터,WIFI', 'https://example.com/photo/haeundae-1.jpg'),
-    (102, '둔산협업룸', '010-3333-4444', 3, '우리 1002-555-666666', 8, 20000, '협업 친화적 레이아웃', '협업_친화적,모던한', 'TV,HDMI', 'https://example.com/photo/dunsan-1.jpg'),
-    (103, '인주프라이빗룸', '010-4444-5555', 4, '농협 302-7777-888888', 4, 12000, '프라이빗, 방음 좋음', '프라이빗한,방음_좋은', '개인콘센트,방음도어', 'https://example.com/photo/inju-1.jpg'),
-    (104, '공평크리에이티브', '010-5555-6666', 5, '카카오 3333-99-000000', 12, 30000, '창의적인 무드, 장비 완비', '창의적인,장비_완비,트렌디한', '프로젝터,마이크,스피커', 'https://example.com/photo/gongpyeong-1.jpg,https://example.com/photo/gongpyeong-2.jpg');
 
--- =========================
--- Schedule
--- (slotIndex를 단일 컬럼에 통합)
--- =========================
-insert into schedule (id, date, en_phone_number, re_phone_number, room_id, slot_index)
-values
-    (200, DATE '2025-08-20', '010-1111-2222', null, 100, '9,10,11'),
-    (201, DATE '2025-08-20', '010-2222-3333', null, 101, '13,14'),
-    (202, DATE '2025-08-21', '010-3333-4444', null, 102, '10,11,12'),
-    (203, DATE '2025-08-21', '010-4444-5555', null, 103, '15'),
-    (204, DATE '2025-08-22', '010-5555-6666', null, 104, '9,10,11,12');
+-- Schedule 테이블 더미 데이터 (각 room마다 1~3개)
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (1, '2025-10-25', '010-1234-5678', '010-9876-5432', 1);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (2, '2025-10-26', '010-1234-5678', '010-9876-5432', 1);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (3, '2025-11-01', '010-2345-6789', '010-8765-4321', 2);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (4, '2025-11-02', '010-2345-6789', '010-8765-4321', 2);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (5, '2025-11-15', '010-3456-7890', '010-1111-2222', 3);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (6, '2025-11-16', '010-3456-7890', '010-1111-2222', 3);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (7, '2025-11-20', '010-4567-8901', '010-2222-3333', 4);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (8, '2025-11-21', '010-4567-8901', '010-2222-3333', 4);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (9, '2025-12-05', '010-5678-9012', '010-3333-4444', 5);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (10, '2025-12-06', '010-5678-9012', '010-3333-4444', 5);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (11, '2025-12-10', '010-6789-0123', '010-4444-5555', 6);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (12, '2025-12-11', '010-6789-0123', '010-4444-5555', 6);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (13, '2025-12-15', '010-7890-1234', '010-5555-6666', 7);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (14, '2025-12-16', '010-7890-1234', '010-5555-6666', 7);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (15, '2025-12-20', '010-8901-2345', '010-6666-7777', 8);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (16, '2025-12-21', '010-8901-2345', '010-6666-7777', 8);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (17, '2025-12-25', '010-9012-3456', '010-7777-8888', 9);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (18, '2025-12-26', '010-9012-3456', '010-7777-8888', 9);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (19, '2025-12-30', '010-0123-4567', '010-8888-9999', 10);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (20, '2025-12-31', '010-0123-4567', '010-8888-9999', 10);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (21, '2025-11-10', '010-1122-3344', '010-1111-2222', 11);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (22, '2025-11-11', '010-1122-3344', '010-1111-2222', 11);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (23, '2025-11-18', '010-2233-4455', '010-2222-3333', 12);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (24, '2025-11-19', '010-2233-4455', '010-2222-3333', 12);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (25, '2025-11-25', '010-3344-5566', '010-3333-4444', 13);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (26, '2025-11-26', '010-3344-5566', '010-3333-4444', 13);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (27, '2025-12-03', '010-4455-6677', '010-4444-5555', 14);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (28, '2025-12-04', '010-4455-6677', '010-4444-5555', 14);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (29, '2025-12-10', '010-5566-7788', '010-5555-6666', 15);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (30, '2025-12-11', '010-5566-7788', '010-5555-6666', 15);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (31, '2025-12-17', '010-6677-8899', '010-6666-7777', 16);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (32, '2025-12-18', '010-6677-8899', '010-6666-7777', 16);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (33, '2025-12-24', '010-7788-9900', '010-7777-8888', 17);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (34, '2025-12-25', '010-7788-9900', '010-7777-8888', 17);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (35, '2025-11-05', '010-8899-0011', '010-8888-9999', 18);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (36, '2025-11-06', '010-8899-0011', '010-8888-9999', 18);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (37, '2025-11-12', '010-9900-1122', '010-0000-1111', 19);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (38, '2025-11-13', '010-9900-1122', '010-0000-1111', 19);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (39, '2025-11-20', '010-0011-2233', '010-1111-2222', 20);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (40, '2025-11-21', '010-0011-2233', '010-1111-2222', 20);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (41, '2025-11-28', '010-1122-3344', '010-2222-3333', 21);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (42, '2025-11-29', '010-1122-3344', '010-2222-3333', 21);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (43, '2025-12-05', '010-2233-4455', '010-3333-4444', 22);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (44, '2025-12-06', '010-2233-4455', '010-3333-4444', 22);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (45, '2025-12-12', '010-3344-5566', '010-4444-5555', 23);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (46, '2025-12-13', '010-3344-5566', '010-4444-5555', 23);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (47, '2025-12-19', '010-4455-6677', '010-5555-6666', 24);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (48, '2025-12-20', '010-4455-6677', '010-5555-6666', 24);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (49, '2025-12-26', '010-5566-7788', '010-6666-7777', 25);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (50, '2025-12-27', '010-5566-7788', '010-6666-7777', 25);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (51, '2025-12-01', '010-6677-8899', '010-7777-8888', 26);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (52, '2025-12-02', '010-6677-8899', '010-7777-8888', 26);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (53, '2025-12-08', '010-7788-9900', '010-8888-9999', 27);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (54, '2025-12-09', '010-7788-9900', '010-8888-9999', 27);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (55, '2025-12-15', '010-8899-0011', '010-9999-0000', 28);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (56, '2025-12-16', '010-8899-0011', '010-9999-0000', 28);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (57, '2025-12-22', '010-9900-1122', '010-0000-1111', 29);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (58, '2025-12-23', '010-9900-1122', '010-0000-1111', 29);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (59, '2025-12-29', '010-0011-2233', '010-1111-2222', 30);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (60, '2025-12-30', '010-0011-2233', '010-1111-2222', 30);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (61, '2025-11-03', '010-1122-3344', '010-2222-3333', 31);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (62, '2025-11-04', '010-1122-3344', '010-2222-3333', 31);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (63, '2025-11-08', '010-2233-4455', '010-3333-4444', 32);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (64, '2025-11-09', '010-2233-4455', '010-3333-4444', 32);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (65, '2025-11-14', '010-3344-5566', '010-4444-5555', 33);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (66, '2025-11-15', '010-3344-5566', '010-4444-5555', 33);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (67, '2025-11-20', '010-4455-6677', '010-5555-6666', 34);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (68, '2025-11-21', '010-4455-6677', '010-5555-6666', 34);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (69, '2025-11-25', '010-5566-7788', '010-6666-7777', 35);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (70, '2025-11-26', '010-5566-7788', '010-6666-7777', 35);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (71, '2025-11-30', '010-6677-8899', '010-7777-8888', 36);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (72, '2025-12-01', '010-6677-8899', '010-7777-8888', 36);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (73, '2025-12-05', '010-7788-9900', '010-8888-9999', 37);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (74, '2025-12-06', '010-7788-9900', '010-8888-9999', 37);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (75, '2025-12-10', '010-8899-0011', '010-9999-0000', 38);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (76, '2025-12-11', '010-8899-0011', '010-9999-0000', 38);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (77, '2025-12-15', '010-9900-1122', '010-0000-1111', 39);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (78, '2025-12-16', '010-9900-1122', '010-0000-1111', 39);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (79, '2025-12-20', '010-0011-2233', '010-1111-2222', 40);
+INSERT INTO schedule (id, date, en_phone_number, re_phone_number, room_id) VALUES (80, '2025-12-21', '010-0011-2233', '010-1111-2222', 40);
 
--- =========================
--- Reservation
--- (slotIndex를 단일 컬럼에 통합)
--- =========================
-insert into reservation (id, re_name, re_phone_number, date, room_id, slot_index)
-values
-    (300, '김하나', '010-9000-1111', DATE '2025-08-20', 100, '10'),
-    (301, '박둘',   '010-9000-2222', DATE '2025-08-21', 102, '11'),
-    (302, '이셋',   '010-9000-3333', DATE '2025-08-22', 104, '9,10');
+-- Schedule-slotIndex 연결 테이블
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 10);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 11);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 12);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 13);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 14);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (1, 15);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (2, 20);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (2, 21);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (2, 22);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (2, 23);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (3, 30);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (3, 31);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (3, 32);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (3, 33);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (4, 40);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (4, 41);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (4, 42);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (4, 43);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (5, 5);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (5, 6);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (5, 7);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (6, 8);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (6, 9);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (7, 10);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (7, 11);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (8, 12);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (8, 13);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (9, 14);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (9, 15);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (10, 16);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (10, 17);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (11, 18);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (11, 19);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (12, 20);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (12, 21);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (13, 22);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (13, 23);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (14, 24);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (14, 25);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (15, 26);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (15, 27);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (16, 28);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (16, 29);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (17, 30);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (17, 31);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (18, 32);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (18, 33);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (19, 34);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (19, 35);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (20, 36);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (20, 37);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (21, 38);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (21, 39);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (22, 40);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (22, 41);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (23, 42);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (23, 43);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (24, 44);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (24, 45);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (25, 46);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (25, 47);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (26, 0);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (26, 1);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (27, 2);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (27, 3);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (28, 4);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (28, 5);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (29, 6);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (29, 7);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (30, 8);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (30, 9);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (31, 10);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (31, 11);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (32, 12);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (32, 13);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (33, 14);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (33, 15);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (34, 16);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (34, 17);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (35, 18);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (35, 19);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (36, 20);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (36, 21);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (37, 22);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (37, 23);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (38, 24);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (38, 25);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (39, 26);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (39, 27);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (40, 28);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (40, 29);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (41, 30);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (41, 31);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (42, 32);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (42, 33);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (43, 34);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (43, 35);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (44, 36);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (44, 37);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (45, 38);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (45, 39);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (46, 40);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (46, 41);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (47, 42);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (47, 43);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (48, 44);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (48, 45);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (49, 46);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (49, 47);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (50, 0);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (50, 1);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (51, 2);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (51, 3);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (52, 4);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (52, 5);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (53, 6);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (53, 7);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (54, 8);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (54, 9);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (55, 10);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (55, 11);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (56, 12);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (56, 13);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (57, 14);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (57, 15);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (58, 16);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (58, 17);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (59, 18);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (59, 19);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (60, 20);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (60, 21);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (61, 22);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (61, 23);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (62, 24);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (62, 25);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (63, 26);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (63, 27);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (64, 28);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (64, 29);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (65, 30);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (65, 31);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (66, 32);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (66, 33);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (67, 34);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (67, 35);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (68, 36);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (68, 37);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (69, 38);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (69, 39);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (70, 40);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (70, 41);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (71, 42);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (71, 43);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (72, 44);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (72, 45);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (73, 46);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (73, 47);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (74, 0);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (74, 1);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (75, 2);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (75, 3);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (76, 4);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (76, 5);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (77, 6);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (77, 7);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (78, 8);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (78, 9);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (79, 10);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (79, 11);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (80, 12);
+INSERT INTO schedule_slot_index (schedule_id, slot_index) VALUES (80, 13);
 
--- =========================
--- 양방향 연관 관계 상 Address.room (mappedBy)이므로 별도 업데이트 없이
--- Room의 address_id FK만 정확하면 됩니다.
--- =========================
+-- Reservation 테이블 더미 데이터 (30개)
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (1, '김철수', '010-5555-6666', '2025-10-25', 1);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (2, '박영희', '010-7777-8888', '2025-11-01', 2);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (3, '최민지', '010-2222-3333', '2025-11-15', 3);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (4, '이하늘', '010-3333-4444', '2025-11-20', 4);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (5, '김민준', '010-4444-5555', '2025-12-05', 5);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (6, '이지은', '010-5555-6666', '2025-12-10', 6);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (7, '박서준', '010-6666-7777', '2025-12-15', 7);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (8, '김지민', '010-7777-8888', '2025-12-20', 8);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (9, '이수혁', '010-8888-9999', '2025-12-25', 9);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (10, '정우성', '010-9999-0000', '2025-12-30', 10);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (11, '송혜교', '010-0000-1111', '2025-11-10', 11);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (12, '현빈', '010-1111-2222', '2025-11-18', 12);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (13, '손예진', '010-2222-3333', '2025-11-25', 13);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (14, '김태리', '010-3333-4444', '2025-12-03', 14);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (15, '강동원', '010-4444-5555', '2025-12-10', 15);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (16, '공유', '010-5555-6666', '2025-12-17', 16);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (17, '박보검', '010-6666-7777', '2025-12-24', 17);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (18, '박보영', '010-7777-8888', '2025-11-05', 18);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (19, '조정석', '010-8888-9999', '2025-11-12', 19);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (20, '전지현', '010-9999-0000', '2025-11-20', 20);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (21, '송중기', '010-0000-1111', '2025-11-28', 21);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (22, '김수현', '010-1111-2222', '2025-12-05', 22);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (23, '아이유', '010-2222-3333', '2025-12-12', 23);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (24, '박서준', '010-3333-4444', '2025-12-19', 24);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (25, '김민석', '010-4444-5555', '2025-12-26', 25);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (26, '김고은', '010-5555-6666', '2025-12-01', 26);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (27, '류준열', '010-6666-7777', '2025-12-08', 27);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (28, '박보영', '010-7777-8888', '2025-12-15', 28);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (29, '정해인', '010-8888-9999', '2025-12-22', 29);
+INSERT INTO reservation (id, name, phone_number, date, room_id) VALUES (30, '정수빈', '010-9999-0000', '2025-12-29', 30);
+
+
+-- Reservation-slotIndex 연결 테이블
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (1, 10);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (1, 11);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (1, 12);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (2, 30);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (2, 31);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (3, 5);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (3, 6);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (4, 10);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (4, 11);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (5, 14);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (5, 15);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (6, 18);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (6, 19);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (7, 22);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (7, 23);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (8, 26);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (8, 27);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (9, 30);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (9, 31);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (10, 34);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (10, 35);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (11, 38);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (11, 39);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (12, 42);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (12, 43);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (13, 46);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (13, 47);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (14, 2);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (14, 3);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (15, 6);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (15, 7);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (16, 10);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (16, 11);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (17, 14);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (17, 15);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (18, 18);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (18, 19);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (19, 22);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (19, 23);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (20, 26);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (20, 27);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (21, 30);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (21, 31);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (22, 34);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (22, 35);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (23, 38);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (23, 39);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (24, 42);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (24, 43);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (25, 46);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (25, 47);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (26, 2);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (26, 3);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (27, 6);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (27, 7);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (28, 10);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (28, 11);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (29, 14);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (29, 15);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (30, 18);
+INSERT INTO reservation_slot_index (reservation_id, slot_index) VALUES (30, 19);
+
+-- Room Chip List 더미 데이터 (40개, id 필드 명시)
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (1, 1, '감성적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (2, 1, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (3, 2, '모던한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (4, 2, '회의');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (5, 3, '세련된');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (6, 3, '촬영');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (7, 4, '활기찬');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (8, 4, '스터디');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (9, 5, '조용한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (10, 5, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (11, 6, '넓은');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (12, 6, '회의');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (13, 7, '컬러풀한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (14, 7, '이벤트');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (15, 8, '레트로');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (16, 8, '연습');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (17, 9, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (18, 9, '상담');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (19, 10, '여유로운');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (20, 10, '로맨틱');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (21, 11, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (22, 11, '감성적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (23, 12, '활기찬');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (24, 12, '연습');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (25, 13, '영감을_주는');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (26, 13, '로맨틱');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (27, 14, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (28, 14, '회의');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (29, 15, '창의적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (30, 15, '빈티지');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (31, 16, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (32, 16, '조용한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (33, 17, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (34, 17, '스터디');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (35, 18, '영감을_주는');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (36, 18, '유니크');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (37, 19, '모던한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (38, 19, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (39, 20, '세련된');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (40, 20, '창의적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (41, 21, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (42, 21, '포근한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (43, 22, '여유로운');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (44, 22, '로맨틱');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (45, 23, '감성적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (46, 23, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (47, 24, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (48, 24, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (49, 25, '넓은');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (50, 25, '이벤트');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (51, 26, '포근한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (52, 26, '조용한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (53, 27, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (54, 27, '모던한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (55, 28, '여유로운');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (56, 28, '럭셔리');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (57, 29, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (58, 29, '포근한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (59, 30, '빈티지');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (60, 30, '감성적인');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (61, 31, '모던한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (62, 31, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (63, 32, '럭셔리');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (64, 32, '로맨틱');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (65, 33, '포근한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (66, 33, '여유로운');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (67, 34, '세련된');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (68, 34, '심플');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (69, 35, '유니크');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (70, 35, '이벤트');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (71, 36, '활기찬');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (72, 36, '넓은');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (73, 37, '모던한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (74, 37, '깔끔한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (75, 38, '럭셔리');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (76, 38, '여유로운');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (77, 39, '따뜻한');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (78, 39, '빈티지');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (79, 40, '세련된');
+INSERT INTO room_chip_list (id, room_id, chip_list) VALUES (80, 40, '로맨틱');
+
+-- Room Option List 더미 데이터 (40개, id 필드 명시)
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (1, 1, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (2, 1, '냉난방');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (3, 2, '빔 프로젝터');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (4, 2, '화이트보드');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (5, 3, '삼각대');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (6, 3, '조명');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (7, 4, 'PC');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (8, 4, '사물함');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (9, 5, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (10, 5, '콘센트');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (11, 6, '마이크');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (12, 6, '스크린');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (13, 7, '노래방 기기');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (14, 7, '테이블');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (15, 8, '악기');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (16, 8, '보면대');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (17, 9, '음료');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (18, 9, '의자');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (19, 10, '테라스');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (20, 10, '그네');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (21, 11, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (22, 11, '커피');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (23, 12, '음향시설');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (24, 12, '전신거울');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (25, 13, '야외');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (26, 13, '테이블');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (27, 14, '빔 프로젝터');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (28, 14, '화이트보드');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (29, 15, '공구');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (30, 15, '작업대');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (31, 16, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (32, 16, '콘센트');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (33, 17, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (34, 17, '대형 모니터');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (35, 18, '물감');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (36, 18, '캔버스');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (37, 19, '마이크');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (38, 19, '조명');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (39, 20, '편집 프로그램');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (40, 20, '컴퓨터');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (41, 21, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (42, 21, '침구류');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (43, 22, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (44, 22, '수건');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (45, 23, '수영장');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (46, 23, '주차');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (47, 24, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (48, 24, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (49, 25, '주방');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (50, 25, '침구류');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (51, 26, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (52, 26, '주차');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (53, 27, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (54, 27, '수건');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (55, 28, '수영장');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (56, 28, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (57, 29, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (58, 29, '주방');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (59, 30, '주차');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (60, 30, '침구류');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (61, 31, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (62, 31, '수건');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (63, 32, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (64, 32, '수영장');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (65, 33, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (66, 33, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (67, 34, '주방');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (68, 34, '주차');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (69, 35, '수영장');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (70, 35, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (71, 36, '조식');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (72, 36, '침구류');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (73, 37, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (74, 37, '수건');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (75, 38, '수영장');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (76, 38, '주차');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (77, 39, '바비큐');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (78, 39, '주방');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (79, 40, 'Wi-Fi');
+INSERT INTO room_option_list (id, room_id, option_list) VALUES (80, 40, '조식');
+
+-- Room Photo List 더미 데이터 (40개, id 필드 명시)
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (1, 1, 'room1_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (2, 1, 'room1_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (3, 2, 'room2_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (4, 2, 'room2_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (5, 3, 'room3_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (6, 3, 'room3_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (7, 4, 'room4_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (8, 4, 'room4_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (9, 5, 'room5_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (10, 5, 'room5_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (11, 6, 'room6_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (12, 6, 'room6_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (13, 7, 'room7_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (14, 7, 'room7_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (15, 8, 'room8_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (16, 8, 'room8_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (17, 9, 'room9_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (18, 9, 'room9_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (19, 10, 'room10_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (20, 10, 'room10_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (21, 11, 'room11_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (22, 11, 'room11_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (23, 12, 'room12_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (24, 12, 'room12_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (25, 13, 'room13_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (26, 13, 'room13_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (27, 14, 'room14_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (28, 14, 'room14_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (29, 15, 'room15_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (30, 15, 'room15_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (31, 16, 'room16_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (32, 16, 'room16_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (33, 17, 'room17_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (34, 17, 'room17_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (35, 18, 'room18_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (36, 18, 'room18_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (37, 19, 'room19_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (38, 19, 'room19_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (39, 20, 'room20_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (40, 20, 'room20_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (41, 21, 'room21_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (42, 21, 'room21_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (43, 22, 'room22_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (44, 22, 'room22_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (45, 23, 'room23_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (46, 23, 'room23_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (47, 24, 'room24_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (48, 24, 'room24_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (49, 25, 'room25_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (50, 25, 'room25_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (51, 26, 'room26_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (52, 26, 'room26_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (53, 27, 'room27_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (54, 27, 'room27_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (55, 28, 'room28_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (56, 28, 'room28_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (57, 29, 'room29_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (58, 29, 'room29_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (59, 30, 'room30_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (60, 30, 'room30_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (61, 31, 'room31_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (62, 31, 'room31_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (63, 32, 'room32_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (64, 32, 'room32_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (65, 33, 'room33_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (66, 33, 'room33_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (67, 34, 'room34_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (68, 34, 'room34_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (69, 35, 'room35_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (70, 35, 'room35_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (71, 36, 'room36_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (72, 36, 'room36_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (73, 37, 'room37_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (74, 37, 'room37_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (75, 38, 'room38_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (76, 38, 'room38_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (77, 39, 'room39_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (78, 39, 'room39_photo2.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (79, 40, 'room40_photo1.jpg');
+INSERT INTO room_photo_list (id, room_id, photo_list) VALUES (80, 40, 'room40_photo2.jpg');
