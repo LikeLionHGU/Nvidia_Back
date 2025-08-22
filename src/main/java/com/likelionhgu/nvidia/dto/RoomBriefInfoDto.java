@@ -1,6 +1,5 @@
 package com.likelionhgu.nvidia.dto;
 
-import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,28 +12,22 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-public class RoomInfoDto {
+public class RoomBriefInfoDto {
     private Long roomId;
-    private List<String> photo;
+    private String photo;
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
-    private String memo;
-    private List<String> chipList;
-    private List<String> optionList;
     private int price;
 
-    public static RoomInfoDto from(Room room){
-        return RoomInfoDto.builder()
+    public static RoomBriefInfoDto from(Room room){
+        return RoomBriefInfoDto.builder()
                 .roomId(room.getId())
-                .photo(room.getPhotoList())
+                .photo(room.getPhotoList().get(0))
                 .address(AddressDto.from(room.getAddress()))
                 .maxPeople(room.getMaxPeople())
                 .phoneNumber(room.getEnPhoneNumber())
                 .price(room.getPrice())
-                .memo(room.getMemo())
-                .chipList(room.getChipList())
-                .optionList(room.getOptionList())
                 .build();
     }
 }

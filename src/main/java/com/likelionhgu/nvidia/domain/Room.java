@@ -1,7 +1,6 @@
 package com.likelionhgu.nvidia.domain;
 
 import com.likelionhgu.nvidia.controller.request.EnrollmentRequest;
-import com.likelionhgu.nvidia.converter.IntegerSetConverter;
 import jakarta.persistence.*;
 import lombok.*;
 

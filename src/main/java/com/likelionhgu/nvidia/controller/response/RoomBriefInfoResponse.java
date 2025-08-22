@@ -1,8 +1,7 @@
 package com.likelionhgu.nvidia.controller.response;
 
-import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.dto.AddressDto;
-import com.likelionhgu.nvidia.dto.RoomInfoDto;
+import com.likelionhgu.nvidia.dto.RoomBriefInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,28 +13,22 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-public class RoomInfoResponse {
+public class RoomBriefInfoResponse {
     private Long roomId;
-    private List<String> photo;
+    private String photo;
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
-    private String memo;
-    private List<String> chipList;
-    private List<String> optionList;
     private int price;
 
-    public static RoomInfoResponse from(RoomInfoDto roomInfoDto){
-        return RoomInfoResponse.builder()
-                .roomId(roomInfoDto.getRoomId())
-                .photo(roomInfoDto.getPhoto())
-                .address(roomInfoDto.getAddress())
-                .maxPeople(roomInfoDto.getMaxPeople())
-                .phoneNumber(roomInfoDto.getPhoneNumber())
-                .price(roomInfoDto.getPrice())
-                .memo(roomInfoDto.getMemo())
-                .chipList(roomInfoDto.getChipList())
-                .optionList(roomInfoDto.getOptionList())
+    public static RoomBriefInfoResponse from(RoomBriefInfoDto roomBriefInfoDto){
+        return RoomBriefInfoResponse.builder()
+                .roomId(roomBriefInfoDto.getRoomId())
+                .photo(roomBriefInfoDto.getPhoto())
+                .address(roomBriefInfoDto.getAddress())
+                .maxPeople(roomBriefInfoDto.getMaxPeople())
+                .phoneNumber(roomBriefInfoDto.getPhoneNumber())
+                .price(roomBriefInfoDto.getPrice())
                 .build();
     }
 }

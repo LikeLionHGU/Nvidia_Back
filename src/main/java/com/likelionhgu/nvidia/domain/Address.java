@@ -16,9 +16,9 @@ public class Address {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String roadName;
     private double latitude;
     private double longitude;
-    private String roadName;
 
     @OneToOne(mappedBy = "address")
     private Room room;

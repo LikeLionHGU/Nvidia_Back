@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RoomInfoResponse {
     private Long roomId;
-    private List<String> photo;
+    private List<String> photoList;
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
@@ -28,7 +28,7 @@ public class RoomInfoResponse {
     public static RoomInfoResponse from(RoomInfoDto roomInfoDto){
         return RoomInfoResponse.builder()
                 .roomId(roomInfoDto.getRoomId())
-                .photo(roomInfoDto.getPhoto())
+                .photoList(roomInfoDto.getPhotoList())
                 .address(roomInfoDto.getAddress())
                 .maxPeople(roomInfoDto.getMaxPeople())
                 .phoneNumber(roomInfoDto.getPhoneNumber())

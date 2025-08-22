@@ -11,11 +11,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Builder
 public class AvailableTimeSlotsResponse {
-    private Set<Integer> timeSlots;
+    private Set<Integer> schedule;
 
     public static AvailableTimeSlotsResponse from(AvailableTimeSlotsDto dto){
         return AvailableTimeSlotsResponse.builder()
-                .timeSlots(dto.getTimeSlots())
+                .schedule(dto.getTimeSlots())
                 .build();
     }
 }
