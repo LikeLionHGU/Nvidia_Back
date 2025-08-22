@@ -18,30 +18,28 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RoomReservationInfoResponse {
     private Long roomId;
-    private List<String> photo;
+    private List<String> photoList;
     private AddressDto address;
     private int maxPeople;
     private String phoneNumber;
-    private int price;
     private String memo;
     private List<String> chipList;
     private List<String> optionList;
+    private int price;
     private String account;
-    private List<ScheduleDto> timeTable;
 
     public static RoomReservationInfoResponse from(RoomReservationInfoDto roomReservationInfoDto){
         return RoomReservationInfoResponse.builder()
                 .roomId(roomReservationInfoDto.getRoomId())
-                .photo(roomReservationInfoDto.getPhoto())
+                .photoList(roomReservationInfoDto.getPhotoList())
                 .address(roomReservationInfoDto.getAddress())
                 .maxPeople(roomReservationInfoDto.getMaxPeople())
                 .phoneNumber(roomReservationInfoDto.getPhoneNumber())
-                .price(roomReservationInfoDto.getPrice())
                 .memo(roomReservationInfoDto.getMemo())
                 .chipList(roomReservationInfoDto.getChipList())
                 .optionList(roomReservationInfoDto.getOptionList())
+                .price(roomReservationInfoDto.getPrice())
                 .account(roomReservationInfoDto.getAccount())
-                .timeTable(roomReservationInfoDto.getTimeTable())
                 .build();
     }
 }

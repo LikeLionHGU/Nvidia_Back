@@ -11,11 +11,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Builder
 public class AvailableDaysResponse {
-    private Set<Integer> days;
+    private Set<Integer> availableDay;
 
     public static AvailableDaysResponse from(AvailableDaysDto dto){
         return AvailableDaysResponse.builder()
-                .days(dto.getDays())
+                .availableDay(dto.getDays())
                 .build();
     }
 }

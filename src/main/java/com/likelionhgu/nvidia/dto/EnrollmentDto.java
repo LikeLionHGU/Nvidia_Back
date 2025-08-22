@@ -16,6 +16,7 @@ import java.util.TreeSet;
 @Builder
 public class EnrollmentDto {
     private Long roomId;
+    private String photo;
     private AddressDto address;
     private String phoneNumber;
     private String account;
@@ -28,6 +29,7 @@ public class EnrollmentDto {
     public static EnrollmentDto from(Room room, Schedule schedule) {
         return EnrollmentDto.builder()
                 .roomId(room.getId())
+                .photo(room.getPhotoList().get(0))
                 .address(AddressDto.from(room.getAddress()))
                 .phoneNumber(room.getEnPhoneNumber())
                 .account(room.getAccount())

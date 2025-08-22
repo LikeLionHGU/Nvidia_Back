@@ -24,8 +24,8 @@ public class Controller {
 
     // 1.첫 화면 로딩 시 자주 찾는 장소 표시 (현재 위치 기준 근처 장소 탐색)
     @GetMapping("/main")
-    public ResponseEntity<List<RoomInfoDto>> setInitialCard(@RequestBody AddressRequest address){
-        List<RoomInfoDto> recommendsDto = service.getRooms(address);
+    public ResponseEntity<List<RoomBriefInfoDto>> setInitialCard(@RequestBody AddressRequest address){
+        List<RoomBriefInfoDto> recommendsDto = service.getRooms(address);
         return ResponseEntity.ok().body(recommendsDto);
     }
 
@@ -40,9 +40,9 @@ public class Controller {
     //TODO: (주소 자체만으로 검색 가능한가 -> 필요한 기능???)
     //TODO: 가격 낮은 순으로 필터링해서 보내기
     @GetMapping("/recommend")
-    public ResponseEntity<List<RoomInfoResponse>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
-        List<RoomInfoDto> recommendsDtos = service.getRoomsWithPrompt(AddressAndPrompt);
-        return ResponseEntity.ok().body(recommendsDtos.stream().map(RoomInfoResponse::from).toList());
+    public ResponseEntity<List<RoomBriefInfoResponse>> recommendAboutPrompt(@RequestBody AddressAndPromptAndPricesRequest AddressAndPrompt){
+        List<RoomBriefInfoDto> recommendsDtos = service.getRoomsWithPrompt(AddressAndPrompt);
+        return ResponseEntity.ok().body(recommendsDtos.stream().map(RoomBriefInfoResponse::from).toList());
     }
 
     // 4.추천 카드 눌렀을 때 해당 상세 모달 띄움
@@ -54,9 +54,9 @@ public class Controller {
 
     // 5.예약하러 가기 버튼 클릭 시 예약 페이지 이동
     @GetMapping("/reservation/{roomId}")
-    public ResponseEntity<RoomReservationInfoDto> enterReservationPage(@PathVariable Long roomId){
+    public ResponseEntity<RoomReservationInfoResponse> enterReservationPage(@PathVariable Long roomId){
         RoomReservationInfoDto roomReservationInfoDto = service.getTheRoomReservationInfoById(roomId);
-        return ResponseEntity.ok().body(roomReservationInfoDto);
+        return ResponseEntity.ok().body(RoomReservationInfoResponse.from(roomReservationInfoDto));
     }
 
     // 5-1. 예약페이지를 띄울 때 어떤 날에 예약을 할 수 있는지 표시

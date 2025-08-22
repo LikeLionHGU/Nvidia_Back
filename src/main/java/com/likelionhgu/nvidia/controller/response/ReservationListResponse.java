@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 public class ReservationListResponse {
     private Long roomId;
-    private List<String> photo;
+    private String photo;
     private AddressDto address;
     private String phoneNumber;
     private String account;
@@ -28,7 +28,7 @@ public class ReservationListResponse {
     public static ReservationListResponse from(ReservationDto reservationDto){
         return ReservationListResponse.builder()
                 .roomId(reservationDto.getRoomId())
-                .photo(reservationDto.getPhoto())
+                .photo(reservationDto.getPhoto().get(0))
                 .address(reservationDto.getAddress())
                 .phoneNumber(reservationDto.getPhoneNumber())
                 .account(reservationDto.getAccount())
