@@ -130,7 +130,7 @@ public class Service {
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
     public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
-        List<String> uploadUrlList = null;
+        List<String> uploadUrlList = new ArrayList<>();
 
         String uploadUrl = null;
         for(MultipartFile file : files) {
