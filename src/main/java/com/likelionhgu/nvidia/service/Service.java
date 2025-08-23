@@ -35,9 +35,16 @@ public class Service {
     // request에 해당하는 공실을 repository에서 찾는다.
     public List<RoomBriefInfoDto> getRooms(AddressRequest request){
         double radiusInKm = 3.0;
-        List<Address> nearbyAddresses = addressRepository.findByLocationWithinRadius(request.getLatitude(), request.getLongitude(), radiusInKm);
+        List<Address> nearby = addressRepository.findByLocationWithinRadius(
+                request.getLatitude(), request.getLongitude(), radiusInKm);
 
-        return nearbyAddresses.stream().map(Address::getRoom).map(RoomBriefInfoDto::from).toList();
+        // 주변에 3km 공실이 없는 예외처리 진행
+        return nearby.stream()
+                .peek(a -> { if (a.getRoom() == null) System.err.println("[/main] address " + a.getId() + " has no room"); })
+                .map(Address::getRoom)
+                .filter(Objects::nonNull)
+                .map(RoomBriefInfoDto::from)
+                .toList();
     }
 
     // 받은 주소 리스트들의 중간 주소를 계산한다.
@@ -90,23 +97,61 @@ public class Service {
     }
 
     // 입력받은(캘린더에서 선택한) 달의 등록된 일들을 불러온다.
-    public AvailableDaysDto getAvailableDays(Long roomId, MonthRequest request){
+    public AvailableDaysDto getAvailableDays(Long roomId, MonthRequest request) {
+        System.out.println("roomId: " + roomId + ", month : " + request.getMonth());
         int thisYear = LocalDate.now().getYear();
         LocalDate startDate = LocalDate.of(thisYear, request.getMonth(), 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        System.out.println("debug 1");
+        // 1) 해당 달의 모든 스케줄 로드
         List<Schedule> schedules = scheduleRepository.findByRoomIdAndDateBetween(roomId, startDate, endDate);
 
-        return AvailableDaysDto.from(schedules);
+        // 2) 같은 기간의 예약 로드
+        List<Reservation> reservations = reservationRepository.findByRoomIdAndDateBetween(roomId, startDate, endDate);
+
+        // 3) 날짜별로 ‘예약된 슬롯’ 집계 (union)
+        Map<LocalDate, Set<Integer>> reservedByDate = new HashMap<>();
+        for (Reservation r : reservations) {
+            reservedByDate
+                    .computeIfAbsent(r.getDate(), d -> new HashSet<>())
+                    .addAll(r.getSlotIndex() != null ? r.getSlotIndex() : Set.of());
+        }
+
+        // 4) 스케줄 슬롯에서 ‘예약된 슬롯’을 뺀 뒤, 남는 슬롯이 있으면 그 날짜를 유지
+        List<Schedule> availableSchedules = schedules.stream()
+                .filter(Objects::nonNull)
+                .filter(s -> {
+                    Set<Integer> allSlots = s.getSlotIndex() != null ? new HashSet<>(s.getSlotIndex()) : new HashSet<>();
+                    Set<Integer> reserved = reservedByDate.getOrDefault(s.getDate(), Set.of());
+                    allSlots.removeAll(reserved);
+                    return !allSlots.isEmpty(); // 남은 슬롯이 1개라도 있어야 ‘가능한 날’
+                })
+                .toList();
+
+        System.out.println("debug 2");
+        System.out.println("schedules size : " + schedules.size());
+        System.out.println("available schedules size : " + availableSchedules.size());
+
+        return AvailableDaysDto.from(availableSchedules);
     }
+
 
     // 입력받은(캘린더에서 선택한) 일의 등록된 시간 슬롯을 불러온다.
     public AvailableTimeSlotsDto getAvailableTimeSlots(Long roomId, MonthAndDayRequest request){
         int thisYear = LocalDate.now().getYear();
         LocalDate targetDate = LocalDate.of(thisYear, request.getMonth(), request.getDay());
-        Schedule schedules = scheduleRepository.findByRoomIdAndDate(roomId, targetDate);
 
-        return AvailableTimeSlotsDto.from(schedules);
+        // 해당 날짜의 원본 스케줄
+        Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, targetDate);
+
+        // 해당 날짜의 모든 예약(여러 건일 수 있음)
+        List<Reservation> reservations = reservationRepository.findByRoomIdAndDate(roomId, targetDate);
+
+        // 예약 슬롯 제외 후 남은 슬롯만 반환
+        return AvailableTimeSlotsDto.from(schedule, reservations);
     }
+
 
 
 
