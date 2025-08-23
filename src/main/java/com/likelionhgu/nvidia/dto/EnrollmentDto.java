@@ -25,17 +25,22 @@ public class EnrollmentDto {
     private LocalDate enrolledDate;
     private Set<Integer> enrolledTime  = new TreeSet<>();
 
-    public static EnrollmentDto from(Room room, Schedule schedule) {
+    private String guestName;
+    private String guestPhoneNum;
+
+    public static EnrollmentDto from(Room room, LocalDate date, Set<Integer> slots, String guestName, String guestPhoneNum) {
         return EnrollmentDto.builder()
                 .roomId(room.getId())
-                .photo(room.getPhotoList().get(0))
+                .photo(room.getPhotoList().isEmpty() ? null : room.getPhotoList().get(0))
                 .address(AddressDto.from(room.getAddress()))
                 .phoneNumber(room.getEnPhoneNumber())
                 .account(room.getAccount())
                 .maxPeople(room.getMaxPeople())
                 .price(room.getPrice())
-                .enrolledDate(schedule.getDate())
-                .enrolledTime(schedule.getSlotIndex())
+                .enrolledDate(date)
+                .enrolledTime(new TreeSet<>(slots))
+                .guestName(guestName)
+                .guestPhoneNum(guestPhoneNum)
                 .build();
     }
 }

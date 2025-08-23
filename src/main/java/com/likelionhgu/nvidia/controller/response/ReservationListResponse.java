@@ -25,6 +25,9 @@ public class ReservationListResponse {
     private LocalDate reservedDate;
     private Set<Integer> reservedTime;
 
+    private String hostName;
+    private String hostPhoneNum;
+
     public static ReservationListResponse from(ReservationDto reservationDto){
         return ReservationListResponse.builder()
                 .roomId(reservationDto.getRoomId())

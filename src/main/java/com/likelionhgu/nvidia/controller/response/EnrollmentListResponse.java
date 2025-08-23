@@ -24,6 +24,9 @@ public class EnrollmentListResponse {
     private LocalDate enrolledDate;
     private Set<Integer> enrolledTime  = new TreeSet<>();
 
+    private String guestName;
+    private String guestPhoneNum;
+
     public static EnrollmentListResponse from(EnrollmentDto enrollmentDto) {
         return EnrollmentListResponse.builder()
                 .roomId(enrollmentDto.getRoomId())
@@ -35,6 +38,8 @@ public class EnrollmentListResponse {
                 .price(enrollmentDto.getPrice())
                 .enrolledDate(enrollmentDto.getEnrolledDate())
                 .enrolledTime(enrollmentDto.getEnrolledTime())
+                .guestPhoneNum(enrollmentDto.getGuestPhoneNum())
+                .guestName(enrollmentDto.getGuestName())
                 .build();
     }
 }

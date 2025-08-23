@@ -25,6 +25,9 @@ public class ReservationDto {
     private LocalDate reservedDate;
     private Set<Integer> reservedTime;
 
+    private String hostName;
+    private String hostPhoneNum;
+
     public static ReservationDto from(Reservation reservation){
         return ReservationDto.builder()
                 .roomId(reservation.getRoom().getId())
@@ -37,6 +40,8 @@ public class ReservationDto {
                 .totalPrice(reservation.getRoom().getPrice() * reservation.getSlotIndex().size())
                 .reservedDate(reservation.getDate())
                 .reservedTime(reservation.getSlotIndex())
+                .hostName(reservation.getRoom().getEnName())
+                .hostPhoneNum(reservation.getRoom().getEnPhoneNumber())
                 .build();
 
     }
