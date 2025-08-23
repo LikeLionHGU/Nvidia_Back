@@ -21,25 +21,23 @@ public class ChipExtractorService {
     // 프롬프트 룰
     private static final String RULES = """
         규칙:
-        - 허용된 chip 목록에서만 선택합니다. 새로운 chip을 만들지 않습니다.
+        - 입력된 텍스트와 연관된 모든 chip을 반환합니다.
         - chip 이름은 canonical_name만 사용합니다.
+        - 새로운 chip을 만들지 않습니다.
         - 동의어/오탈자는 가장 가까운 canonical chip으로 매핑합니다.
         - 부정형(예: "~아닌", "not ~") 표현은 해당 chip을 선택하지 않습니다.
-        - 모호하면 빈 배열을 반환합니다.
         - 반드시 아래 JSON 스키마에 맞춰 응답합니다.
         허용 chip(canonical):
-        편안한, 아늑한, 조용한, 활기찬, 세련된, 트렌디한, 클래식한, 고급스러운, 따뜻한, 밝은,
-        활동적인, 프라이빗한, 개방적인, 협업 친화적, 집중하기 좋은, 창의적인, 모던한, 힙한,
-        로맨틱한, 가족 친화적, 저예산, 고급, 교통 편리한, 주차 편리한, 접근성 좋은, 채광 좋은,
-        환기 잘되는, 방음 좋은, 장비 완비, 인스타 감성
+        활기찬, 따뜻한, 포근한, 여유로운, 레트로, 영감을 주는, 모던한, 로맨틱, 세련된,
+        컬러풀한, 깔끔한, 심플, 감성적인, 회의, 스터디, 촬영, 상담, 연습, 시험, 조용한,
+        넓은, 이벤트, 럭셔리, 유니크, 창의적인, 빈티지
         """;
 
     // schema enum (모델 스키마 강제)
     private static final List<String> ENUM = List.of(
-            "편안한","아늑한","조용한","활기찬","세련된","트렌디한","클래식한","고급스러운","따뜻한","밝은",
-            "활동적인","프라이빗한","개방적인","협업 친화적","집중하기 좋은","창의적인","모던한","힙한",
-            "로맨틱한","가족 친화적","저예산","고급","교통 편리한","주차 편리한","접근성 좋은","채광 좋은",
-            "환기 잘되는","방음 좋은","장비 완비","인스타 감성"
+            "활기찬", "따뜻한", "포근한", "여유로운", "레트로", "영감을 주는",
+            "모던한", "로맨틱", "세련된", "컬러풀한", "깔끔한", "심플", "감성적인", "회의", "스터디", "촬영",
+            "상담", "연습", "시험", "조용한", "넓은", "이벤트", "럭셔리", "유니크", "창의적인", "빈티지"
     );
 
     public ChipsResponse extractChips(String query) {
@@ -77,19 +75,20 @@ public class ChipExtractorService {
         String json = findJsonFromParts(parts);
         if (json == null) return new ChipsResponse(List.of(), "NO_TEXT_JSON", "shape");
 
-        // 모델 JSON 파싱 → 서버 enum 필터링
+        // 모델 JSON 파싱
         try {
             JsonNode node = om.readTree(json);
             JsonNode chipsNode = node.get("chips");
             String reason = node.has("reason") && node.get("reason").isTextual() ? node.get("reason").asText() : null;
 
-            List<Chip> filtered = new ArrayList<>();
+            List<Chip> extractedChips = new ArrayList<>();
             if (chipsNode != null && chipsNode.isArray()) {
                 for (JsonNode c : chipsNode) {
-                    normalizeToEnum(c.asText()).ifPresent(filtered::add);
+                    // 모델이 이미 ENUM 내에서 값을 반환하므로, 추가 변환 없이 바로 Chip으로 변환
+                    extractedChips.add(Chip.valueOf(c.asText()));
                 }
             }
-            return new ChipsResponse(List.copyOf(filtered), reason, null);
+            return new ChipsResponse(List.copyOf(extractedChips), reason, null);
         } catch (Exception e) {
             return new ChipsResponse(List.of(), "BAD_JSON", "parse");
         }
@@ -150,29 +149,10 @@ public class ChipExtractorService {
         return (o instanceof Map<?, ?> m) ? (Map<String, Object>) m : Map.of();
     }
 
-    private static Optional<Chip> normalizeToEnum(String s) {
-        if (s == null) return Optional.empty();
+    private static String normalizeToEnum(String s) {
+        if (s == null) return null;
         String n = s.trim().replace('-', ' ').replace('_', ' ').replaceAll("\\s+", " ");
         // 특수 매핑
-        return switch (n) {
-            case "협업 친화적" -> Optional.of(Chip.협업_친화적);
-            case "집중하기 좋은" -> Optional.of(Chip.집중하기_좋은);
-            case "가족 친화적" -> Optional.of(Chip.가족_친화적);
-            case "교통 편리한" -> Optional.of(Chip.교통_편리한);
-            case "주차 편리한" -> Optional.of(Chip.주차_편리한);
-            case "접근성 좋은" -> Optional.of(Chip.접근성_좋은);
-            case "채광 좋은" -> Optional.of(Chip.채광_좋은);
-            case "환기 잘되는" -> Optional.of(Chip.환기_잘되는);
-            case "방음 좋은" -> Optional.of(Chip.방음_좋은);
-            case "장비 완비" -> Optional.of(Chip.장비_완비);
-            case "인스타 감성" -> Optional.of(Chip.인스타_감성);
-            default -> {
-                try {
-                    yield Optional.of(Chip.valueOf(n.replace(' ', '_')));
-                } catch (IllegalArgumentException ex) {
-                    yield Optional.empty();
-                }
-            }
-        };
+        return (n.equals("영감을 주는") ? "영감을_주는" : s);
     }
 }

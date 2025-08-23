@@ -33,12 +33,11 @@ public class Service {
     private final FunctionService functionService;
 
     // request에 해당하는 공실을 repository에서 찾는다.
-    //TODO: 여기에서 AI를 사용해야 할 것 같다
-    public List<RoomInfoDto> getRooms(AddressRequest request){
+    public List<RoomBriefInfoDto> getRooms(AddressRequest request){
         double radiusInKm = 3.0;
         List<Address> nearbyAddresses = addressRepository.findByLocationWithinRadius(request.getLatitude(), request.getLongitude(), radiusInKm);
 
-        return nearbyAddresses.stream().map(Address::getRoom).map(RoomInfoDto::from).toList();
+        return nearbyAddresses.stream().map(Address::getRoom).map(RoomBriefInfoDto::from).toList();
     }
 
     // 받은 주소 리스트들의 중간 주소를 계산한다.
@@ -60,21 +59,21 @@ public class Service {
     }
 
     // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
-    //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
-    public List<RoomInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
-        //TODO: 여기에서 AI를 사용해야 할 것 같다
+    public List<RoomBriefInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
         String prompt = request.getPrompt();
         CoordinateAddressDto midpoint = calculateMidpoint(AddressesForMiddleRequest.from(request.getAddressList()));
 
-        // 거리기준(3km) 필터링
+        // 거리기준(3km) 필터링 + 가격 기준 필터링
         List<Room> recommendedRooms = roomRepository.findWithinRadiusAndPriceRange(midpoint.getLatitude(),midpoint.getLongitude(), 3.0, request.getMinPrice(), request.getMaxPrice());
-        // 가격 기준 필터링
-        List<Room> recommendedRoomsByPrice = functionService.findRoomByBudgetRange(recommendedRooms, request.getMinPrice(), request.getMinPrice());
+        System.out.println("3Km filtering : " + recommendedRooms.size());
         // 프롬프트 기준 필터링
-        List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRoomsByPrice, prompt);
-        return recommendedRoomByPrompt.stream().map(RoomInfoDto::from).toList();
+        List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRooms, prompt);
+        System.out.println("Prompt filtering : " + recommendedRoomByPrompt.size());
+        // 거리기준 sorting
+        List<Room> result = functionService.sortByDistance(recommendedRoomByPrompt, midpoint);
+
+        return result.stream().map(RoomBriefInfoDto::from).toList();
     }
-    //TODO: 정상 작동은 하는데 빈 리스트를 리턴한다.. 왜 그러지?
 
     // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다.
     public RoomInfoDto getTheRoomInfoById(Long roomId){
@@ -112,21 +111,17 @@ public class Service {
 
 
     // 예약 페이지에 입력된 정보들을 예약 기록(Reservation)으로 저장한다.
-    //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
-    // 현재는 한 날짜만 받는 걸로 되어 있음. 반복 전송이 아닌 여러 날짜를 한번에 보낸다면 수정 필요 (일단 프론트에게 API 명세서 댓글로 물어봄)
     public String saveReservation(Long roomId, List<ReservationRequest> requests){
         for (ReservationRequest eachRequest : requests){
             Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, LocalDate.parse(eachRequest.getDate()));
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
             //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
-            System.out.println("1. " + schedule.getDate());
 
             if (room != null) {
                 Reservation reservation = Reservation.from(room, eachRequest);
-                System.out.println("3. " + reservation.getId());
 
                 reservationRepository.save(reservation);
-                schedule.setRePhoneNumber(eachRequest.getRePhoneNumber());
+                schedule.setRePhoneNumber(eachRequest.getPhoneNumber());
             }
         }
 
@@ -134,24 +129,23 @@ public class Service {
     }
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
-    //TODO: 한 날짜 시간 슬롯 전체 선택 기능도 구현 필요
-    public String saveEnrollment(EnrollmentRequest request, MultipartFile file){
-        String uploadUrl = null;
-        Map<String, String> roomPhotoMap = new HashMap<>();
+    public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
+        List<String> uploadUrlList = new ArrayList<>();
 
-        try {
-            uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
-            roomPhotoMap= Map.of("uploadUrl",uploadUrl);
-        } catch (IOException e) {
-            roomPhotoMap = Map.of("error","이미지 업로드에 실패했습니다: " + e.getMessage());
+        String uploadUrl = null;
+        for(MultipartFile file : files) {
+            try {
+                uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+            } catch (IOException e) {
+                System.out.println("error : 이미지 업로드에 실패했습니다: " + e.getMessage());
+            }
+            uploadUrlList.add(uploadUrl);
         }
 
-        // TODO: S3Service를 바로 호출하면 됨. S3컨트롤러 필요 없음 (S3ControllerTest.java 삭제할지 결정 필요)
-        List<String> fileUrl = new ArrayList<>(roomPhotoMap.values());
 
-        //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-        addressRepository.save(request.getAddress());
-        Room targetRoom = roomRepository.save(Room.make(request, fileUrl));
+
+        addressRepository.save(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()));
+        Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
 
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
             Schedule eachSchedule = scheduleRepository.findByEnPhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
@@ -174,7 +168,7 @@ public class Service {
     // 예약 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     public List<ReservationDto> accessToReservationRecords(PasswordRequest passwordRequest){
-        List<Reservation> reservations = reservationRepository.findByRePhoneNumberOrderByDateAsc(passwordRequest.getPhoneNumber());
+        List<Reservation> reservations = reservationRepository.findByPhoneNumberOrderByDateAsc(passwordRequest.getPhoneNumber());
         List<ReservationDto> reservationDtos = reservations.stream().map(ReservationDto::from).toList();
         Map<LocalDate, ReservationDto> reservationMap = new LinkedHashMap<>();
 
@@ -193,12 +187,12 @@ public class Service {
 
     // 등록 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
-    //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
     //TODO: OrderedBy 필요 없는지 확인 필요
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
         System.out.println("phone num : " + passwordRequest.getPhoneNumber());
-        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
+        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedulesOrderByDateAsc(passwordRequest.getPhoneNumber());
         System.out.println("room list size : "+ rooms.size());
+
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         for (Room eachRoom : rooms) {
             for (Schedule eachSchedule : eachRoom.getSchedules()) {
