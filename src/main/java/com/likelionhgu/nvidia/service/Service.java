@@ -196,7 +196,9 @@ public class Service {
     //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
     //TODO: OrderedBy 필요 없는지 확인 필요
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
+        System.out.println("phone num : " + passwordRequest.getPhoneNumber());
         List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
+        System.out.println("room list size : "+ rooms.size());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         for (Room eachRoom : rooms) {
             for (Schedule eachSchedule : eachRoom.getSchedules()) {
