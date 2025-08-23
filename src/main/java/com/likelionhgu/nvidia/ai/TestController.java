@@ -17,8 +17,8 @@ public class TestController {
     private final ChipExtractorService chipExtractorService;
 
     @PostMapping(value = "/gemini/query", produces = "application/json")
-    public ResponseEntity<ChipsResponse> query(@RequestBody @Valid String queryPrompt) {
-        ChipsResponse res = chipExtractorService.extractChips(queryPrompt);
+    public ResponseEntity<ChipsResponse> query(@RequestBody QueryRequest query) {
+        ChipsResponse res = chipExtractorService.extractChips(query.getQuery());
         return ResponseEntity.ok(res);
     }
 }

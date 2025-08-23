@@ -39,5 +39,11 @@ public class Address {
                 .build();
     }
 
-    //TODO: AddressAndPromptAndPricesRequest 안의 Address 해결하기
+    public static Address from(double latitude, double longitude, String roadName){
+        return Address.builder()
+                .latitude(latitude)
+                .longitude(longitude)
+                .roadName(roadName)
+                .build();
+    }
 }

@@ -66,7 +66,7 @@ public class Room {
         return Room.builder()
                 .enName(request.getEnName())
                 .enPhoneNumber(request.getEnPhoneNumber())
-                .address(request.getAddress())
+                .address(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()))
                 .account(request.getAccount())
                 .maxPeople(request.getMaxPeople())
                 .price(request.getPrice())

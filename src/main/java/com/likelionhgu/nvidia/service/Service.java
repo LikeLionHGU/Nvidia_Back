@@ -33,7 +33,6 @@ public class Service {
     private final FunctionService functionService;
 
     // request에 해당하는 공실을 repository에서 찾는다.
-    //TODO: 여기에서 AI를 사용해야 할 것 같다
     public List<RoomBriefInfoDto> getRooms(AddressRequest request){
         double radiusInKm = 3.0;
         List<Address> nearbyAddresses = addressRepository.findByLocationWithinRadius(request.getLatitude(), request.getLongitude(), radiusInKm);
@@ -60,19 +59,20 @@ public class Service {
     }
 
     // request에 해당하는 공실 여러 개를 repository에서 찾고 프롬프트 조건으로 필터링한다.
-    //TODO: 거리 기준 필터링 → 가격 기준 필터링 → 프롬프트가 준 순서 그대로 순서 매기기 (각 추천 장소별 넘버링)
     public List<RoomBriefInfoDto> getRoomsWithPrompt(AddressAndPromptAndPricesRequest request){
-        //TODO: 여기에서 AI를 사용해야 할 것 같다
         String prompt = request.getPrompt();
         CoordinateAddressDto midpoint = calculateMidpoint(AddressesForMiddleRequest.from(request.getAddressList()));
 
-        // 거리기준(3km) 필터링
+        // 거리기준(3km) 필터링 + 가격 기준 필터링
         List<Room> recommendedRooms = roomRepository.findWithinRadiusAndPriceRange(midpoint.getLatitude(),midpoint.getLongitude(), 3.0, request.getMinPrice(), request.getMaxPrice());
-        // 가격 기준 필터링
-        List<Room> recommendedRoomsByPrice = functionService.findRoomByBudgetRange(recommendedRooms, request.getMinPrice(), request.getMinPrice());
+        System.out.println("3Km filtering : " + recommendedRooms.size());
         // 프롬프트 기준 필터링
-        List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRoomsByPrice, prompt);
-        return recommendedRoomByPrompt.stream().map(RoomBriefInfoDto::from).toList();
+        List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRooms, prompt);
+        System.out.println("Prompt filtering : " + recommendedRoomByPrompt.size());
+        // 거리기준 sorting
+        List<Room> result = functionService.sortByDistance(recommendedRoomByPrompt, midpoint);
+
+        return result.stream().map(RoomBriefInfoDto::from).toList();
     }
 
     // 자세히보기 클릭 시 띄우는 모달의 정보를 불러온다.
@@ -111,8 +111,6 @@ public class Service {
 
 
     // 예약 페이지에 입력된 정보들을 예약 기록(Reservation)으로 저장한다.
-    //TODO: 시간 슬롯 넘겨주는 로직 수정 및 스케줄 Entity 재검토 필요
-    // 현재는 한 날짜만 받는 걸로 되어 있음. 반복 전송이 아닌 여러 날짜를 한번에 보낸다면 수정 필요 (일단 프론트에게 API 명세서 댓글로 물어봄)
     public String saveReservation(Long roomId, List<ReservationRequest> requests){
         for (ReservationRequest eachRequest : requests){
             Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, LocalDate.parse(eachRequest.getDate()));
@@ -131,9 +129,8 @@ public class Service {
     }
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
-    //TODO: 한 날짜 시간 슬롯 전체 선택 기능도 구현 필요 -> 프론트에서 자체 처리?
     public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
-        List<String> uploadUrlList = null;
+        List<String> uploadUrlList = new ArrayList<>();
 
         String uploadUrl = null;
         for(MultipartFile file : files) {
@@ -146,8 +143,8 @@ public class Service {
         }
 
 
-        //TODO: Address를 프론트에서 어떻게 받아오는지 확인 (일단 등록은 도로명주소로만 받음)
-        addressRepository.save(request.getAddress());
+
+        addressRepository.save(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()));
         Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
 
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
@@ -190,10 +187,9 @@ public class Service {
 
     // 등록 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
-    //TODO: 한 날짜에 하나만 Schedule이 생성될 수 있도록 로직 확인 필요, 위 함수에서 데이터가 Schedule -> EnrollmentDto 잘 이동되는지 확인
     //TODO: OrderedBy 필요 없는지 확인 필요
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
-        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedules(passwordRequest.getPhoneNumber());
+        List<Room> rooms = roomRepository.findByEnPhoneNumberWithSchedulesOrderByDateAsc(passwordRequest.getPhoneNumber());
         List<EnrollmentDto> enrollmentDtos = new ArrayList<>();
         for (Room eachRoom : rooms) {
             for (Schedule eachSchedule : eachRoom.getSchedules()) {

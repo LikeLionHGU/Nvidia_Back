@@ -11,10 +11,7 @@ import com.likelionhgu.nvidia.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-// TODO: AddressDto는 무한참조를 끊기 위해 Address를 담는 용도로 사용하므로, 기존 Dto를 CoordinateAddressDto로 수정함
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +86,7 @@ public class FunctionService {
     public List<Room> findRoomByBudgetRange(List<Room> roomList, int minPrice, int maxPrice){
         List<Room> filtered = new ArrayList<>();
         for(Room room : roomList){
-            if(room.getPrice() <= maxPrice && room.getPrice() <= minPrice){
+            if(room.getPrice() <= maxPrice && room.getPrice() >= minPrice){
                 filtered.add(room);
             }
         }
@@ -99,26 +96,77 @@ public class FunctionService {
 
     public List<Room> findRoomByChips(List<Room> roomList, String prompt) {
         List<Chip> chips = chipExtractorService.extractChips(prompt).getChips();
+        System.out.println("\n------Chips------");
+        for(Chip chip : chips){
+            System.out.println(chip + ",");
+        }
+        System.out.println("\n");
 
-        List<Room> filtered = new ArrayList<>();
+        if (chips.isEmpty()) {
+            return roomList;
+        }
+
+        // 일치하는 칩의 수를 저장할 맵
+        Map<Room, Long> matchCounts = new HashMap<>();
+
+        // 각 Room의 칩 일치 개수를 계산
         for (Room room : roomList) {
             if (room == null || room.getChipList() == null) continue;
 
-            // room.chipList와 chips 중 하나라도 일치하면 통과
-            boolean match = false;
-            for (Chip chip : chips) {
-                if (room.getChipList().contains(chip.name())) {
-                    match = true;
-                    break;
-                }
-            }
-
-            if (match) {
-                filtered.add(room);
+            long count = chips.stream()
+                    .filter(chip -> room.getChipList().contains(chip.name()))
+                    .count();
+            if (count > 0) {
+                matchCounts.put(room, count);
             }
         }
 
+        // 일치하는 Room들만 추출
+        List<Room> filtered = new ArrayList<>(matchCounts.keySet());
+
+        // 일치 개수를 기준으로 내림차순 정렬
+        filtered.sort(Comparator.comparingLong(matchCounts::get).reversed());
+
         return filtered;
+    }
+
+    public List<Room> sortByDistance(List<Room> roomList, CoordinateAddressDto midpoint){
+        if (roomList == null || roomList.isEmpty()) {
+            return roomList;
+        }
+
+        // Comparator를 사용하여 거리를 기준으로 정렬
+        // 람다식을 사용하여 코드를 간결하게 작성
+        roomList.sort(Comparator.comparingDouble(room ->
+                calculateDistance(
+                        midpoint.getLatitude(),
+                        midpoint.getLongitude(),
+                        room.getAddress().getLatitude(),
+                        room.getAddress().getLongitude()
+                )
+        ));
+
+        return roomList;
+    }
+
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final double EARTH_RADIUS_KM = 6371; // 지구 반지름 (킬로미터)
+
+        lat1 = Math.toRadians(lat1);
+        lon1 = Math.toRadians(lon1);
+        lat2 = Math.toRadians(lat2);
+        lon2 = Math.toRadians(lon2);
+
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1) * Math.cos(lat2) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS_KM * c; // 거리(킬로미터) 반환
     }
 
 

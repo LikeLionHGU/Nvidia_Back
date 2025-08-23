@@ -23,7 +23,6 @@ public class ReservationDto {
     private int totalPrice; // 단위 가격 * 시간 (총 가격)
     private int selectedHour;
     private LocalDate reservedDate;
-    //TODO: String이 아닌 시간 슬롯을 보내주는 게 맞는 것 같아 수정했는데 확인 필요
     private Set<Integer> reservedTime;
 
     public static ReservationDto from(Reservation reservation){
