@@ -233,64 +233,22 @@ public class Service {
     // 등록 기록을 확인한다.
     // 같은 날짜, 다른 시간대의 예약일 경우 한 날짜로 합쳐서 표시한다.
     public List<EnrollmentDto> accessToEnrollmentRecords(PasswordRequest passwordRequest) {
+        // password(phone number)를 가지고 있는 room list를 가져옴
+        String pw = passwordRequest.getPhoneNumber();
+        if (pw == null){
+            throw new IllegalArgumentException("비밀번호(전화번호)가 담겨있지 않습니다");
+        }
+        List<Room> roomList = roomRepository.findByEnPhoneNumber(pw);
 
-        // 1) 호스트(en) 전화로 Room + schedules + reservations 조회
-        List<Room> rooms = roomRepository
-                .findByEnPhoneNumberWithSchedulesOrderByDateAsc(passwordRequest.getPhoneNumber());
-
-        // 키: (roomId, date, guestPhone)
-        record Key(Long roomId, LocalDate date, String guestPhone) {}
-
-        // 2) (roomId, date, guestPhone) -> guestName 매핑 사전 만들기
-        //    같은 날짜에 동일 전화번호로 여러 예약이 있을 수 있으므로, 가장 최근/마지막 값을 우선시(정책 자유)
-        Map<Key, String> nameLookup = new HashMap<>();
-        for (Room room : rooms) {
-            for (Reservation r : room.getReservations()) {
-                if (r.getPhoneNumber() == null || r.getPhoneNumber().isBlank()) continue;
-                if (r.getDate() == null) continue;
-                Key k = new Key(room.getId(), r.getDate(), r.getPhoneNumber());
-                nameLookup.put(k, r.getName()); // 동일 키 중 마지막 name이 남음 (필요시 우선순위 정책 조정)
+        // 각 room마다 reservations를 뽑아냄
+        List<EnrollmentDto> result = new ArrayList<>(); // 결과 받을 준비
+        for (Room room : roomList){
+            List<Reservation> reservationList = room.getReservations();
+            // 각 reservation마다 EnrollmentDto를 만들어줌
+            for (Reservation reservation : reservationList){
+                result.add(EnrollmentDto.from(room, reservation));
             }
         }
-
-        // 3) (roomId, date, guestPhone) 별 슬롯 병합
-        Map<Key, Set<Integer>> mergedSlots = new LinkedHashMap<>();
-        Map<Key, Room> keyToRoom = new HashMap<>();
-
-        for (Room room : rooms) {
-            for (Schedule sch : room.getSchedules()) {
-                String guestPhone = sch.getRePhoneNumber();
-                if (guestPhone == null || guestPhone.isBlank()) continue; // 예약 미지정 슬롯 제외
-                if (sch.getDate() == null) continue;
-
-                Key k = new Key(room.getId(), sch.getDate(), guestPhone);
-                mergedSlots.computeIfAbsent(k, kk -> new TreeSet<>()).addAll(sch.getSlotIndex());
-                keyToRoom.putIfAbsent(k, room);
-            }
-        }
-
-        // 4) 병합 결과 → EnrollmentDto 변환 (guestName/guestPhoneNum 모두 세팅)
-        List<EnrollmentDto> result = new ArrayList<>(mergedSlots.size());
-        for (Map.Entry<Key, Set<Integer>> e : mergedSlots.entrySet()) {
-            Key k = e.getKey();
-            Room room = keyToRoom.get(k);
-            Set<Integer> slots = e.getValue();
-            String guestName = nameLookup.get(k); // 없으면 null일 수 있음
-
-            result.add(EnrollmentDto.from(
-                    room,
-                    k.date(),
-                    slots,
-                    guestName,
-                    k.guestPhone()
-            ));
-        }
-
-        // 5) 정렬(선택): 날짜 → 방 → 예약자 전화
-        result.sort(Comparator
-                .comparing(EnrollmentDto::getEnrolledDate)
-                .thenComparing(EnrollmentDto::getRoomId)
-                .thenComparing(EnrollmentDto::getGuestPhoneNum, Comparator.nullsLast(String::compareTo)));
 
         return result;
     }
