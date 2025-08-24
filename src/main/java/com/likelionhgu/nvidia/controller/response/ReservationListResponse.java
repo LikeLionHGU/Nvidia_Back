@@ -40,6 +40,8 @@ public class ReservationListResponse {
                 .totalPrice(reservationDto.getTotalPrice())
                 .reservedDate(reservationDto.getReservedDate())
                 .reservedTime(reservationDto.getReservedTime())
+                .hostName(reservationDto.getHostName())
+                .hostPhoneNum(reservationDto.getHostPhoneNum())
                 .build();
     }
 }
