@@ -15,7 +15,7 @@ public class GeminiApiClient {
     private final WebClient webClient;
 
     // 필요 시 외부에서 주입받아 공용으로 사용
-    private static final String MODEL = "gemini-2.5-pro";
+    private static final String MODEL = "gemini-1.5-flash";
 
     private static final String RULES = """
             규칙:
