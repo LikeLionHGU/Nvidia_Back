@@ -41,9 +41,7 @@ public class S3Service {
     // 따라서 MultipartFile을 File로 변환하는 과정이 있는 것! (file을 쓰는 것이 전통적인 방식!)
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {
-            System.out.println("임시 파일 삭제 성공: " + targetFile.getName());
         } else {
-            System.out.println("임시 파일 삭제 실패: " + targetFile.getName());
         }
     }
 
