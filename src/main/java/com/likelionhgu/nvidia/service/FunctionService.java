@@ -103,29 +103,30 @@ public class FunctionService {
 
     public List<Room> findRoomByChips(List<Room> roomList, String prompt) {
         try {
+            System.out.println("debug 1");
             // --- 1) Gemini 호출 (다른 분석들과 동일한 패턴) ---
             String chipsJson = geminiApiClient.generateChipsJson(prompt);
-
+            System.out.println("debug 2");
             // --- 2) JSON 파싱 (readTree → treeToValue) ---
             JsonNode chipsNode = objectMapper.readTree(chipsJson);
             ChipsJSON chips = objectMapper.treeToValue(chipsNode, ChipsJSON.class);
-
+            System.out.println("debug 3");
             System.out.println("\n------Chips------");
             for (ChipJSON chip : chips.getChips()) {
                 System.out.println(chip.getChip());
             }
             System.out.println();
-
+            System.out.println("debug 4");
 
             if (chips == null || chips.getChips() == null || chips.getChips().isEmpty()) {
                 return List.of();
             }
-
+            System.out.println("debug 5");
             Set<String> desired = chips.getChips().stream()
                     .map(ChipJSON::getChip)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
-
+            System.out.println("debug 6");
             // --- 3) 겹치는 칩 개수로 스코어링 & 정렬 ---
             Map<Room, Long> matchCounts = new HashMap<>();
             for (Room room : roomList) {
@@ -141,15 +142,15 @@ public class FunctionService {
                     matchCounts.put(room, matches);
                 }
             }
-
+            System.out.println("debug 7");
             List<Room> filtered = new ArrayList<>(matchCounts.keySet());
             filtered.sort(Comparator.comparingLong(matchCounts::get).reversed());
-
+            System.out.println("debug 8");
             return filtered;
 
         } catch (Exception e) {
             // 파싱 실패나 API 오류 시 안전하게 빈 결과
-            return List.of();
+            return roomList;
         }
     }
 

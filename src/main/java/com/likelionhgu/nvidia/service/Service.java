@@ -99,12 +99,10 @@ public class Service {
 
     // 입력받은(캘린더에서 선택한) 달의 등록된 일들을 불러온다.
     public AvailableDaysDto getAvailableDays(Long roomId, MonthRequest request) {
-        System.out.println("roomId: " + roomId + ", month : " + request.getMonth());
         int thisYear = LocalDate.now().getYear();
         LocalDate startDate = LocalDate.of(thisYear, request.getMonth(), 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        System.out.println("debug 1");
         // 1) 해당 달의 모든 스케줄 로드
         List<Schedule> schedules = scheduleRepository.findByRoomIdAndDateBetween(roomId, startDate, endDate);
 
@@ -129,10 +127,6 @@ public class Service {
                     return !allSlots.isEmpty(); // 남은 슬롯이 1개라도 있어야 ‘가능한 날’
                 })
                 .toList();
-
-        System.out.println("debug 2");
-        System.out.println("schedules size : " + schedules.size());
-        System.out.println("available schedules size : " + availableSchedules.size());
 
         return AvailableDaysDto.from(availableSchedules);
     }
