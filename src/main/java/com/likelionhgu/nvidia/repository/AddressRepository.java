@@ -10,17 +10,14 @@ import java.util.List;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-
-    @Query(value = """
-        SELECT a.*,
-               ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) / 1000 AS distance_km
-        FROM address a
-        WHERE ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) <= :radiusInKm * 1000
-        ORDER BY distance_km
-        """, nativeQuery = true)
+    @Query(value = "SELECT a.*, " +
+            "ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) / 1000 AS distance_km " +
+            "FROM address a " +
+            "WHERE ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) <= :radiusInKm * 1000 " +
+            "ORDER BY distance_km",
+            nativeQuery = true)
     List<Address> findByLocationWithinRadiusOrderByDistance(
             @Param("latitude") Double latitude,
             @Param("longitude") Double longitude,
-            @Param("radiusInKm") double radiusInKm  // ← 이름 맞추기
-    );
+            @Param("radiusInKm") double radiusInKm);
 }
