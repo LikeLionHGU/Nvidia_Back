@@ -175,42 +175,36 @@ public class Service {
     }
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
+    // EnrollmentService.java (수정된 코드)
     public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
-        System.out.println("debug 1");
         List<String> uploadUrlList = new ArrayList<>();
 
-        String uploadUrl = null;
         for(MultipartFile file : files) {
             try {
-                uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+                String uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
+                uploadUrlList.add(uploadUrl);
             } catch (IOException e) {
-                System.out.println("error : 이미지 업로드에 실패했습니다: " + e.getMessage());
+                System.err.println("오류: 이미지 업로드에 실패했습니다: " + e.getMessage());
             }
-            uploadUrlList.add(uploadUrl);
         }
-        System.out.println("debug 2");
 
+        // 1. Address 객체를 먼저 생성합니다.
+        Address newAddress = Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName());
 
+        // 2. Room 객체를 생성하고, 위에서 만든 Address 객체를 설정합니다.
+        Room targetRoom = Room.make(request, uploadUrlList);
+        targetRoom.setAddress(newAddress); // Room에 Address 객체 연결
+        newAddress.setRoom(targetRoom);    // 양방향 관계 설정
 
-        addressRepository.save(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()));
-        System.out.println("debug 3");
-        Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
-        System.out.println("debug 4");
+        // 3. 모든 Schedule 객체를 만들어서 Room의 schedules 리스트에 추가합니다.
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
-            Schedule eachSchedule = scheduleRepository.findByEnPhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
-            if(eachSchedule != null){
-                // 해당 날짜의 타임 테이블이 생성돼 있으면 이어서 추가
-                eachSchedule.getSlotIndex().addAll(eachEnrollmentTime.getSelectedTimeSlotIndex());
-                scheduleRepository.save(eachSchedule);
-            }else{
-                // 해당 날짜의 타임 테이블이 없으면 해당 날짜 Schedule 새로 만듦
-                Schedule newSchedule = Schedule.make(eachEnrollmentTime, targetRoom);
-                newSchedule.setRoom(targetRoom);
-                scheduleRepository.save(newSchedule);
-                targetRoom.getSchedules().add(newSchedule);
-            }
+            Schedule newSchedule = Schedule.make(eachEnrollmentTime, targetRoom);
+            targetRoom.getSchedules().add(newSchedule);
         }
-        System.out.println("debug 5");
+
+        // 4. Room 객체만 저장하면 cascade 옵션에 따라
+        // 연관된 Address와 Schedules가 모두 함께 저장됩니다.
+        roomRepository.save(targetRoom);
 
         return "등록 완료";
     }
