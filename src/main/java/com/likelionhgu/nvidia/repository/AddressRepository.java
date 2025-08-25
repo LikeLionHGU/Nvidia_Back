@@ -19,5 +19,5 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     List<Address> findByLocationWithinRadiusOrderByDistance(
             @Param("latitude") Double latitude,
             @Param("longitude") Double longitude,
-            @Param("radius") double radiusInKm);
+            @Param("radiusInKm") double radiusInKm);
 }
