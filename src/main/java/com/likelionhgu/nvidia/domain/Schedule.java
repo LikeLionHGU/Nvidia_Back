@@ -1,7 +1,5 @@
 package com.likelionhgu.nvidia.domain;
 
-import com.likelionhgu.nvidia.controller.request.ReservationRequest;
-import com.likelionhgu.nvidia.converter.IntegerSetConverter;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,5 @@
 package com.likelionhgu.nvidia.controller.request;
 
-import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.dto.EnrollmentTimeDto;
 import lombok.Getter;
 import lombok.Setter;
