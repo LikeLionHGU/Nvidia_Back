@@ -1,6 +1,7 @@
 package com.likelionhgu.nvidia.dto;
 
 import com.likelionhgu.nvidia.domain.Address;
+import com.likelionhgu.nvidia.domain.Reservation;
 import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.domain.Schedule;
 import lombok.*;
@@ -23,12 +24,12 @@ public class EnrollmentDto {
     private int maxPeople;
     private int price;
     private LocalDate enrolledDate;
-    private Set<Integer> enrolledTime  = new TreeSet<>();
+    private Set<Integer> enrolledTime = new TreeSet<>();
 
     private String guestName;
     private String guestPhoneNum;
 
-    public static EnrollmentDto from(Room room, LocalDate date, Set<Integer> slots, String guestName, String guestPhoneNum) {
+    public static EnrollmentDto from(Room room, Reservation reservation) {
         return EnrollmentDto.builder()
                 .roomId(room.getId())
                 .photo(room.getPhotoList().isEmpty() ? null : room.getPhotoList().get(0))
@@ -37,10 +38,10 @@ public class EnrollmentDto {
                 .account(room.getAccount())
                 .maxPeople(room.getMaxPeople())
                 .price(room.getPrice())
-                .enrolledDate(date)
-                .enrolledTime(new TreeSet<>(slots))
-                .guestName(guestName)
-                .guestPhoneNum(guestPhoneNum)
+                .enrolledDate(reservation.getDate())
+                .enrolledTime(reservation.getSlotIndex())
+                .guestName(reservation.getName())
+                .guestPhoneNum(reservation.getPhoneNumber())
                 .build();
     }
 }

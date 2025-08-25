@@ -28,4 +28,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("maxPrice") int maxPrice
     );
 
+    List<Room> findByEnPhoneNumber(String enPhoneNumber);
 }
