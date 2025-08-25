@@ -14,11 +14,11 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class TestController {
-    private final ChipExtractorService chipExtractorService;
+    private final ChipExtractionService chipExtractionService;
 
     @PostMapping(value = "/gemini/query", produces = "application/json")
-    public ResponseEntity<ChipsResponse> query(@RequestBody QueryRequest query) {
-        ChipsResponse res = chipExtractorService.extractChips(query.getQuery());
+    public ResponseEntity<ChipsJSON> query(@RequestBody QueryRequest query) {
+        ChipsJSON res = chipExtractionService.extractChips(query.getQuery());
         return ResponseEntity.ok(res);
     }
 }

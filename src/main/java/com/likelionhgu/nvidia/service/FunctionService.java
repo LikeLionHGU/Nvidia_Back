@@ -1,9 +1,13 @@
 package com.likelionhgu.nvidia.service;
 
-import com.likelionhgu.nvidia.ai.ChipExtractorService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.likelionhgu.nvidia.ai.ChipExtractionService;
+import com.likelionhgu.nvidia.ai.ChipJSON;
+import com.likelionhgu.nvidia.ai.ChipsJSON;
+import com.likelionhgu.nvidia.ai.GeminiApiClient;
 import com.likelionhgu.nvidia.controller.request.AddressRequest;
 import com.likelionhgu.nvidia.domain.Address;
-import com.likelionhgu.nvidia.domain.Chip;
 import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.dto.CoordinateAddressDto;
 import com.likelionhgu.nvidia.repository.AddressRepository;
@@ -12,13 +16,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FunctionService {
     private final RoomRepository roomRepository;
     private final AddressRepository addressRepository;
-    private final ChipExtractorService chipExtractorService;
+    private final ChipExtractionService chipExtractionService;
+    private final GeminiApiClient geminiApiClient;
+    private final ObjectMapper objectMapper;
 
     private double distanceInKm(double lat1Deg, double lon1Deg, double lat2Deg, double lon2Deg) {
         final double R = 6371.0; // km
@@ -95,39 +102,48 @@ public class FunctionService {
     }
 
     public List<Room> findRoomByChips(List<Room> roomList, String prompt) {
-        List<Chip> chips = chipExtractorService.extractChips(prompt).getChips();
-        System.out.println("\n------Chips------");
-        for(Chip chip : chips){
-            System.out.println(chip + ",");
-        }
-        System.out.println("\n");
+        try {
+            // --- 1) Gemini 호출 (다른 분석들과 동일한 패턴) ---
+            String chipsJson = geminiApiClient.generateChipsJson(prompt);
 
-        if (chips.isEmpty()) {
-            return roomList;
-        }
+            // --- 2) JSON 파싱 (readTree → treeToValue) ---
+            JsonNode chipsNode = objectMapper.readTree(chipsJson);
+            ChipsJSON chips = objectMapper.treeToValue(chipsNode, ChipsJSON.class);
 
-        // 일치하는 칩의 수를 저장할 맵
-        Map<Room, Long> matchCounts = new HashMap<>();
-
-        // 각 Room의 칩 일치 개수를 계산
-        for (Room room : roomList) {
-            if (room == null || room.getChipList() == null) continue;
-
-            long count = chips.stream()
-                    .filter(chip -> room.getChipList().contains(chip.name()))
-                    .count();
-            if (count > 0) {
-                matchCounts.put(room, count);
+            if (chips == null || chips.getChips() == null || chips.getChips().isEmpty()) {
+                return List.of();
             }
+
+            Set<String> desired = chips.getChips().stream()
+                    .map(ChipJSON::getChip)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            // --- 3) 겹치는 칩 개수로 스코어링 & 정렬 ---
+            Map<Room, Long> matchCounts = new HashMap<>();
+            for (Room room : roomList) {
+                if (room.getChipList() == null || room.getChipList().isEmpty())
+                    continue;
+
+                long matches = room.getChipList().stream()
+                        .filter(Objects::nonNull)
+                        .filter(desired::contains)
+                        .count();
+
+                if (matches > 0) {
+                    matchCounts.put(room, matches);
+                }
+            }
+
+            List<Room> filtered = new ArrayList<>(matchCounts.keySet());
+            filtered.sort(Comparator.comparingLong(matchCounts::get).reversed());
+
+            return filtered;
+
+        } catch (Exception e) {
+            // 파싱 실패나 API 오류 시 안전하게 빈 결과
+            return List.of();
         }
-
-        // 일치하는 Room들만 추출
-        List<Room> filtered = new ArrayList<>(matchCounts.keySet());
-
-        // 일치 개수를 기준으로 내림차순 정렬
-        filtered.sort(Comparator.comparingLong(matchCounts::get).reversed());
-
-        return filtered;
     }
 
     public List<Room> sortByDistance(List<Room> roomList, CoordinateAddressDto midpoint){
