@@ -35,16 +35,17 @@ public class Service {
     // request에 해당하는 공실을 repository에서 찾는다.
     public List<RoomBriefInfoDto> getRooms(AddressRequest request){
         double radiusInKm = 3.0;
-        List<Address> nearby = addressRepository.findByLocationWithinRadius(
+        List<Address> nearby = addressRepository.findByLocationWithinRadiusOrderByDistance(
                 request.getLatitude(), request.getLongitude(), radiusInKm);
 
         // 주변에 3km 공실이 없는 예외처리 진행
-        return nearby.stream()
+        return (nearby.stream()
                 .peek(a -> { if (a.getRoom() == null) System.err.println("[/main] address " + a.getId() + " has no room"); })
                 .map(Address::getRoom)
                 .filter(Objects::nonNull)
+                .limit(3)
                 .map(RoomBriefInfoDto::from)
-                .toList();
+                .toList());
     }
 
     // 받은 주소 리스트들의 중간 주소를 계산한다.

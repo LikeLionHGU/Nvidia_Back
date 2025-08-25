@@ -10,14 +10,14 @@ import java.util.List;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-    Address findByLatitudeAndLongitude(Double latitude, Double longitude);
-
-    @Query(value = "SELECT a FROM Address a WHERE " +
-            "(6371 * acos(cos(radians(:latitude)) * cos(radians(a.latitude)) * cos(radians(a.longitude) - radians(:longitude)) + " +
-            "sin(radians(:latitude)) * sin(radians(a.latitude)))) <= :radius")
-    List<Address> findByLocationWithinRadius(
-            @Param("latitude") double latitude,
-            @Param("longitude") double longitude,
-            @Param("radius") double radius
-    );
+    @Query(value = "SELECT a.*, " +
+            "ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) / 1000 AS distance_km " +
+            "FROM address a " +
+            "WHERE ST_Distance_Sphere(POINT(a.longitude, a.latitude), POINT(:longitude, :latitude)) <= :radiusInKm * 1000 " +
+            "ORDER BY distance_km",
+            nativeQuery = true)
+    List<Address> findByLocationWithinRadiusOrderByDistance(
+            @Param("latitude") Double latitude,
+            @Param("longitude") Double longitude,
+            @Param("radius") double radiusInKm);
 }
