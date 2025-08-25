@@ -175,6 +175,7 @@ public class Service {
 
     // 등록 페이지에 입력된 정보들을 등록 기록(Room, Address, Schedule 각각)으로 저장한다.
     public String saveEnrollment(EnrollmentRequest request, List<MultipartFile> files){
+        System.out.println("debug 1");
         List<String> uploadUrlList = new ArrayList<>();
 
         String uploadUrl = null;
@@ -186,12 +187,14 @@ public class Service {
             }
             uploadUrlList.add(uploadUrl);
         }
+        System.out.println("debug 2");
 
 
 
         addressRepository.save(Address.from(request.getLatitude(), request.getLongitude(), request.getRoadName()));
+        System.out.println("debug 3");
         Room targetRoom = roomRepository.save(Room.make(request, uploadUrlList));
-
+        System.out.println("debug 4");
         for (EnrollmentTimeDto eachEnrollmentTime : request.getEnrollmentTimeDto()){
             Schedule eachSchedule = scheduleRepository.findByEnPhoneNumberAndDate(request.getEnPhoneNumber(), eachEnrollmentTime.getDate());
             if(eachSchedule != null){
@@ -206,6 +209,7 @@ public class Service {
                 targetRoom.getSchedules().add(newSchedule);
             }
         }
+        System.out.println("debug 5");
 
         return "등록 완료";
     }

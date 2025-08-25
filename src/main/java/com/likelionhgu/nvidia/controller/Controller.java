@@ -5,6 +5,7 @@ import com.likelionhgu.nvidia.controller.response.*;
 import com.likelionhgu.nvidia.dto.*;
 import com.likelionhgu.nvidia.service.Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,7 +80,7 @@ public class Controller {
     }
 
     // 7.등록 페이지에서 등록 버튼을 눌러 등록
-    @PostMapping(value = "/enrollment/done")
+    @PostMapping(value="/enrollment/done", consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> doEnrollment(
             @RequestPart("request") EnrollmentRequest request,
             @RequestPart("imageFile") List<MultipartFile> files){
