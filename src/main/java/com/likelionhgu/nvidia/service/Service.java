@@ -73,10 +73,8 @@ public class Service {
 
         // 거리기준(3km) 필터링 + 가격 기준 필터링
         List<Room> recommendedRooms = roomRepository.findWithinRadiusAndPriceRange(midpoint.getLatitude(),midpoint.getLongitude(), 3.0, request.getMinPrice(), request.getMaxPrice());
-        System.out.println("3Km filtering : " + recommendedRooms.size());
         // 프롬프트 기준 필터링
         List<Room> recommendedRoomByPrompt = functionService.findRoomByChips(recommendedRooms, prompt);
-        System.out.println("Prompt filtering : " + recommendedRoomByPrompt.size());
         // 거리기준 sorting
         List<Room> result = functionService.sortByDistance(recommendedRoomByPrompt, midpoint);
 
@@ -178,7 +176,6 @@ public class Service {
                 String uploadUrl = s3Service.uploadFiles(file, "roomPhoto/");
                 uploadUrlList.add(uploadUrl);
             } catch (IOException e) {
-                System.err.println("오류: 이미지 업로드에 실패했습니다: " + e.getMessage());
             }
         }
 
