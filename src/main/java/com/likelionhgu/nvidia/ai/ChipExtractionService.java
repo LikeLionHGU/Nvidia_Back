@@ -17,8 +17,8 @@ public class ChipExtractionService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    // 필요 시 모델명 변경 가능: gemini-2.5-pro, gemini-2.0-flash-exp 등
-    private static final String MODEL = "gemini-2.5-pro";
+    // 필요 시 모델명 변경 가능:
+    private static final String MODEL = "gemini-1.5-flash";
 
     // 요청에서 사용할 프롬프트 (질문에 주신 문자열 그대로)
     private static final String RULES = """
