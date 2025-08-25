@@ -110,6 +110,13 @@ public class FunctionService {
             JsonNode chipsNode = objectMapper.readTree(chipsJson);
             ChipsJSON chips = objectMapper.treeToValue(chipsNode, ChipsJSON.class);
 
+            System.out.println("\n------Chips------");
+            for (ChipJSON chip : chips.getChips()) {
+                System.out.println(chip.getChip());
+            }
+            System.out.println();
+
+
             if (chips == null || chips.getChips() == null || chips.getChips().isEmpty()) {
                 return List.of();
             }
