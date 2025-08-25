@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -153,7 +152,6 @@ public class Service {
         for (ReservationRequest eachRequest : requests){
             Schedule schedule = scheduleRepository.findByRoomIdAndDate(roomId, LocalDate.parse(eachRequest.getDate()));
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("Room not found"));
-            //TODO: room에서 바로 schedule 접근해서 rePhoneNumber를 수정할 수 있다면 로직 수정 필요
 
             if (room != null) {
                 Reservation reservation = Reservation.from(room, eachRequest);

@@ -1,8 +1,6 @@
 package com.likelionhgu.nvidia.dto;
 
-import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Room;
-import com.likelionhgu.nvidia.domain.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

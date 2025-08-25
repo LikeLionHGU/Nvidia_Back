@@ -1,13 +1,10 @@
 package com.likelionhgu.nvidia.dto;
 
-import com.likelionhgu.nvidia.domain.Address;
 import com.likelionhgu.nvidia.domain.Reservation;
 import com.likelionhgu.nvidia.domain.Room;
-import com.likelionhgu.nvidia.domain.Schedule;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 

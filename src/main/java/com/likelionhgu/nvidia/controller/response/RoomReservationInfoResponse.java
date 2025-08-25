@@ -1,9 +1,7 @@
 package com.likelionhgu.nvidia.controller.response;
 
-import com.likelionhgu.nvidia.domain.Room;
 import com.likelionhgu.nvidia.dto.AddressDto;
 import com.likelionhgu.nvidia.dto.RoomReservationInfoDto;
-import com.likelionhgu.nvidia.dto.ScheduleDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
